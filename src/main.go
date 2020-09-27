@@ -10,12 +10,6 @@ import (
 
 var tmpl *template.Template
 
-func handleRoot(w http.ResponseWriter, _ *http.Request) {
-	if err := tmpl.ExecuteTemplate(w, "/", nil); err != nil {
-		panic(err)
-	}
-}
-
 func loadHtmlTemplates() (*template.Template, error) {
 	if err := os.Chdir("src/templates"); err != nil {
 		return nil, err
@@ -31,6 +25,12 @@ func init() {
 
 	tmpl, err = loadHtmlTemplates()
 	if err != nil {
+		panic(err)
+	}
+}
+
+func handleRoot(w http.ResponseWriter, _ *http.Request) {
+	if err := tmpl.ExecuteTemplate(w, "/", nil); err != nil {
 		panic(err)
 	}
 }
