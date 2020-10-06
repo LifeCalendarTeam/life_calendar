@@ -24,20 +24,16 @@ func init() {
 	var err error
 
 	tmpl, err = loadHtmlTemplates()
-	if err != nil {
-		panic(err)
-	}
+	panicIfError(err)
 }
 
 func handleRoot(w http.ResponseWriter, _ *http.Request) {
-	if err := tmpl.ExecuteTemplate(w, "/", nil); err != nil {
-		panic(err)
-	}
+	panicIfError(tmpl.ExecuteTemplate(w, "/", nil))
 }
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", handleRoot)
+	r.HandleFunc("/", handleRoot).Methods("GET")
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
