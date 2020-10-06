@@ -8,6 +8,13 @@ The project of a smart online diary with lots of features.
 - the ability to find other users by email or nickname and send them friend requests
 - the ability to accept friend requests and see friends' statistics
 
+## Usage
+Simply run
+```bash
+go get -d ./src/... # Install dependencies
+go run ./src/... # Run webserver
+```
+
 ## Authors
 - [Egor Filatov](https://github.com/FixedOctocat)
 - [Tatiana Kadykova](https://github.com/tanya-kta)
