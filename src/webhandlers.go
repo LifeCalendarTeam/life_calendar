@@ -69,10 +69,19 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleLogout(w http.ResponseWriter, r *http.Request) {
+	session, _ := storage.Get(r, "session")
+	session.Options.MaxAge = -1
+	panicIfError(session.Save(r, w))
+
+	http.Redirect(w, r, "..", 302)
+}
+
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", handleRoot).Methods("GET")
 	r.HandleFunc("/login", handleLogin).Methods("GET", "POST")
+	r.HandleFunc("/logout", handleLogout).Methods("GET")
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
