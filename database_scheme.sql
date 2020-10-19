@@ -10,13 +10,13 @@ CREATE TABLE "users" (
 
 CREATE TABLE "days" (
   "id" serial PRIMARY KEY,
-  "user_id" integer REFERENCES users,
+  "user_id" integer REFERENCES users NOT NULL,
   "date" date NOT NULL
 );
 
 CREATE TABLE "types_of_activities" (
   "id" serial PRIMARY KEY,
-  "user_id" integer REFERENCES users,
+  "user_id" integer REFERENCES users NOT NULL,
   "name" varchar NOT NULL,
   "color" varchar NOT NULL,
   "is_everyday" bool NOT NULL
@@ -24,20 +24,20 @@ CREATE TABLE "types_of_activities" (
 
 CREATE TABLE "types_of_emotions" (
   "id" serial PRIMARY KEY,
-  "user_id" integer REFERENCES users,
+  "user_id" integer REFERENCES users NOT NULL,
   "name" varchar NOT NULL,
   "color" varchar NOT NULL,
   "is_everyday" bool NOT NULL
 );
 
 CREATE TABLE "activities" (
-  "type_id" integer REFERENCES types_of_activities,
-  "day_id" integer REFERENCES days,
+  "type_id" integer REFERENCES types_of_activities NOT NULL,
+  "day_id" integer REFERENCES days NOT NULL,
   "proportion" integer NOT NULL
 );
 
 CREATE TABLE "emotions" (
-  "type_id" integer REFERENCES types_of_emotions,
-  "day_id" integer REFERENCES days,
+  "type_id" integer REFERENCES types_of_emotions NOT NULL,
+  "day_id" integer REFERENCES days NOT NULL,
   "proportion" integer NOT NULL
 );
