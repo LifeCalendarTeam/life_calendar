@@ -18,8 +18,8 @@ import (
 )
 
 var tmpl *template.Template
+var cookieStorage *sessions.CookieStore
 var requestsDecoder = schema.NewDecoder()
-var storage = sessions.NewCookieStore(securecookie.GenerateRandomKey(32))
 var MaxProportion = 100.
 
 func loadHtmlTemplates() (*template.Template, error) {
@@ -37,6 +37,14 @@ func init() {
 
 	tmpl, err = loadHtmlTemplates()
 	panicIfError(err)
+
+	var cookieKey []byte
+	if cookieKeyStr, exists := os.LookupEnv("cookie_key"); exists {
+		cookieKey = []byte(cookieKeyStr)
+	} else {
+		cookieKey = securecookie.GenerateRandomKey(32)
+	}
+	cookieStorage = sessions.NewCookieStore(cookieKey)
 }
 
 type loginForm struct {
@@ -45,7 +53,7 @@ type loginForm struct {
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	session, _ := storage.Get(r, "session")
+	session, _ := cookieStorage.Get(r, "session")
 
 	panicIfError(tmpl.ExecuteTemplate(w, "/", !session.IsNew))
 }
@@ -63,7 +71,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if true { // Password must be checked here!!
-			session, _ := storage.Get(r, "session")
+			session, _ := cookieStorage.Get(r, "session")
 			session.Values["id"] = person.UserId
 			session.Values["expires"] = time.Now().Add(24 * time.Hour).Unix()
 			panicIfError(session.Save(r, w))
@@ -76,7 +84,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleLogout(w http.ResponseWriter, r *http.Request) {
-	session, _ := storage.Get(r, "session")
+	session, _ := cookieStorage.Get(r, "session")
 	session.Options.MaxAge = -1
 	panicIfError(session.Save(r, w))
 
@@ -84,7 +92,7 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
-	session, _ := storage.Get(r, "session")
+	session, _ := cookieStorage.Get(r, "session")
 	if session.IsNew {
 		http.Error(w, "You should be authorized to call this method", http.StatusUnauthorized)
 		return
@@ -153,6 +161,7 @@ func main() {
 	r.HandleFunc("/logout", handleLogout).Methods("GET")
 
 	r.HandleFunc("/api/days/brief", handleApiDaysBrief).Methods("GET")
+	//r.HandleFunc("/api/days/{id:[0-9]+}")
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
