@@ -1,20 +1,26 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"html/template"
+	"math"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
 var tmpl *template.Template
 var requestsDecoder = schema.NewDecoder()
 var storage = sessions.NewCookieStore(securecookie.GenerateRandomKey(32))
+var MaxProportion = 100.
 
 func loadHtmlTemplates() (*template.Template, error) {
 	if err := os.Chdir("src/templates"); err != nil {
@@ -77,11 +83,76 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "..", 302)
 }
 
+func handleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
+	session, _ := storage.Get(r, "session")
+	if session.IsNew {
+		http.Error(w, "You should be authorized to call this method", http.StatusUnauthorized)
+		return
+	}
+
+	type BriefDay struct {
+		DayId        int       `db:"id" json:"id"`
+		Date         time.Time `db:"date" json:"date"`
+		AverageColor [3]int    `json:"average_color"`
+	}
+	days := make([]BriefDay, 0)
+	panicIfError(db.Select(&days, "SELECT id, date FROM days WHERE user_id=$1", session.Values["id"]))
+
+	// Retrieving average color:
+	for dayIdx, _ := range days {
+		type ProportionAndColor struct {
+			Proportion float64 `db:"proportion"`
+			Color      string  `db:"color"`
+		}
+		day := &days[dayIdx]
+
+		colorsProportions := make([]ProportionAndColor, 0)
+		panicIfError(db.Select(&colorsProportions,
+			"SELECT CAST(proportion AS FLOAT), (SELECT color FROM types_of_emotions WHERE id = type_id) FROM emotions",
+		))
+		panicIfError(db.Select(&colorsProportions,
+			"SELECT CAST(proportion AS FLOAT), (SELECT color FROM types_of_activities WHERE id = type_id) "+
+				"FROM activities",
+		))
+
+		TotalProportion := 0.
+		ProportionedTotalColor := [...]float64{0, 0, 0}
+		for proportionColorIdx, _ := range colorsProportions {
+			proportionColor := &colorsProportions[proportionColorIdx]
+
+			TotalProportion += proportionColor.Proportion
+			colorAsStringArray := strings.Split(proportionColor.Color, ",")
+
+			if len(colorAsStringArray) != 3 {
+				panic(errors.New("exactly three colors must be in the `color` field of the database"))
+			}
+
+			for idx, val := range colorAsStringArray {
+				col, err := strconv.Atoi(val)
+				panicIfError(err)
+				ProportionedTotalColor[idx] += float64(col) * proportionColor.Proportion / MaxProportion
+			}
+		}
+
+		for idx, _ := range ProportionedTotalColor {
+			absoluteColor := ProportionedTotalColor[idx] * MaxProportion / TotalProportion
+			day.AverageColor[idx] = int(math.Round(absoluteColor))
+		}
+	}
+
+	js, err := json.Marshal(days)
+	panicIfError(err)
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(js)
+}
+
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", handleRoot).Methods("GET")
 	r.HandleFunc("/login", handleLogin).Methods("GET", "POST")
 	r.HandleFunc("/logout", handleLogout).Methods("GET")
+
+	r.HandleFunc("/api/days/brief", handleApiDaysBrief).Methods("GET")
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
