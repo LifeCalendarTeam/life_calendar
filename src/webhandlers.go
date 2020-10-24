@@ -91,6 +91,39 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "..", 302)
 }
 
+type ProportionAndColor struct {
+	Proportion float64 `db:"proportion"`
+	Color      string  `db:"color"`
+}
+
+func getAverageColor(proportionsAndColors []ProportionAndColor) ([3]int, error) {
+	TotalProportion := 0.
+	ProportionedTotalColor := [...]float64{0, 0, 0}
+	for proportionColorIdx, _ := range proportionsAndColors {
+		proportionColor := &proportionsAndColors[proportionColorIdx]
+
+		TotalProportion += proportionColor.Proportion
+		colorAsStringArray := strings.Split(proportionColor.Color, ",")
+
+		if len(colorAsStringArray) != 3 {
+			return [3]int{0, 0, 0}, errors.New("exactly three colors must be in the `color` field of the database")
+		}
+
+		for idx, val := range colorAsStringArray {
+			col, err := strconv.Atoi(val)
+			panicIfError(err)
+			ProportionedTotalColor[idx] += float64(col) * proportionColor.Proportion / MaxProportion
+		}
+	}
+
+	var ans [3]int
+	for idx, _ := range ProportionedTotalColor {
+		absoluteColor := ProportionedTotalColor[idx] * MaxProportion / TotalProportion
+		ans[idx] = int(math.Round(absoluteColor))
+	}
+	return ans, nil
+}
+
 func handleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 	if session.IsNew {
@@ -108,10 +141,6 @@ func handleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieving average color:
 	for dayIdx, _ := range days {
-		type ProportionAndColor struct {
-			Proportion float64 `db:"proportion"`
-			Color      string  `db:"color"`
-		}
 		day := &days[dayIdx]
 
 		colorsProportions := make([]ProportionAndColor, 0)
@@ -123,35 +152,16 @@ func handleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 				"FROM activities",
 		))
 
-		TotalProportion := 0.
-		ProportionedTotalColor := [...]float64{0, 0, 0}
-		for proportionColorIdx, _ := range colorsProportions {
-			proportionColor := &colorsProportions[proportionColorIdx]
-
-			TotalProportion += proportionColor.Proportion
-			colorAsStringArray := strings.Split(proportionColor.Color, ",")
-
-			if len(colorAsStringArray) != 3 {
-				panic(errors.New("exactly three colors must be in the `color` field of the database"))
-			}
-
-			for idx, val := range colorAsStringArray {
-				col, err := strconv.Atoi(val)
-				panicIfError(err)
-				ProportionedTotalColor[idx] += float64(col) * proportionColor.Proportion / MaxProportion
-			}
-		}
-
-		for idx, _ := range ProportionedTotalColor {
-			absoluteColor := ProportionedTotalColor[idx] * MaxProportion / TotalProportion
-			day.AverageColor[idx] = int(math.Round(absoluteColor))
-		}
+		var err error
+		day.AverageColor, err = getAverageColor(colorsProportions)
+		panicIfError(err)
 	}
 
 	js, err := json.Marshal(days)
 	panicIfError(err)
 	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write(js)
+	_, err = w.Write(js)
+	panicIfError(err)
 }
 
 func main() {
