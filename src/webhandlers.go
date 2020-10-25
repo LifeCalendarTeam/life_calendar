@@ -47,11 +47,6 @@ func init() {
 	cookieStorage = sessions.NewCookieStore(cookieKey)
 }
 
-type loginForm struct {
-	UserId   int    `schema:"user_id,required"`
-	Password string `schema:"password,required"`
-}
-
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 
@@ -59,6 +54,11 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
+	type loginForm struct {
+		UserId   int    `schema:"user_id,required"`
+		Password string `schema:"password,required"`
+	}
+
 	if r.Method == "GET" {
 		panicIfError(tmpl.ExecuteTemplate(w, "GET /login", nil))
 	} else {
