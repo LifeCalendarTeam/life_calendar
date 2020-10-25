@@ -67,7 +67,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		var person loginForm
 
 		if err := requestsDecoder.Decode(&person, r.Form); err != nil {
-			http.Error(w, "Looks like you have sent incorrect data", http.StatusInternalServerError)
+			http.Error(w, "Looks like you have sent incorrect data", http.StatusBadRequest)
 		}
 
 		if true { // Password must be checked here!!
@@ -78,7 +78,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 
 			http.Redirect(w, r, "..", 302)
 		} else {
-			http.Error(w, "Looks like your login or password is incorrect", http.StatusInternalServerError)
+			http.Error(w, "Looks like your login or password is incorrect", http.StatusForbidden)
 		}
 	}
 }
