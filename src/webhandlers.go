@@ -116,11 +116,15 @@ func getAverageColor(proportionsAndColors []ProportionAndColor) ([3]int, error) 
 		}
 	}
 
-	var ans [3]int
-	for idx, _ := range ProportionedTotalColor {
-		absoluteColor := ProportionedTotalColor[idx] * MaxProportion / TotalProportion
-		ans[idx] = int(math.Round(absoluteColor))
+	ans := [3]int{0, 0, 0}
+
+	if TotalProportion != 0 {
+		for idx, _ := range ProportionedTotalColor {
+			absoluteColor := ProportionedTotalColor[idx] * MaxProportion / TotalProportion
+			ans[idx] = int(math.Round(absoluteColor))
+		}
 	}
+
 	return ans, nil
 }
 
