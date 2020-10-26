@@ -130,17 +130,24 @@ Exactly like `/activities` (but for emotions)
 
 
 ### `/activities/<type_id: int>`
-Get info about the activity type by its id. Will return the following information:
-- `name` - the activity's name/label
-- `color` - an RGB color, corresponding to this activity
-- `is_everyday` - whether the activity should be suggested for every new day or its one-time
+Either get info about the activity type by its id or update an activity
 
 #### Request
-Send a `GET` request
+Depending on what you want to do:
+
+- Send a `GET` request
+
+- Send a `PATCH` request with any of the following parameters (each parameter should be used either 0 or 1 times):
+    - `name` - the activity's name/label
+    - `color` - an RGB color, corresponding to this activity
+    - `is_everyday` - whether the activity should be suggested for every new day or its one-time
+
+    If you send an empty `PATCH` request, it will fail with the `400 Bad Request` status code
 
 #### Response
-Response will contain a `json` of the following scheme: `{'label': <str>, 'color': [<int>, <int>, <int>],
+For `GET`: response will contain a `json` of the following scheme: `{'label': <str>, 'color': [<int>, <int>, <int>],
 'is_everyday': true}`
+For `PATCH`: you will get a response with the `200 OK` status code
 
 If there is no activity with the `id` identifier, you will get an error response with the `404 Not Found` status code
 
