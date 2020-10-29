@@ -47,13 +47,13 @@ func init() {
 	cookieStorage = sessions.NewCookieStore(cookieKey)
 }
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
+func HandleRoot(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 
 	panicIfError(tmpl.ExecuteTemplate(w, "/", !session.IsNew))
 }
 
-func handleLogin(w http.ResponseWriter, r *http.Request) {
+func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	type loginForm struct {
 		UserId   int    `schema:"user_id,required"`
 		Password string `schema:"password,required"`
@@ -83,7 +83,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleLogout(w http.ResponseWriter, r *http.Request) {
+func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 	session.Options.MaxAge = -1
 	panicIfError(session.Save(r, w))
@@ -91,12 +91,12 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "..", 302)
 }
 
-type ProportionAndColor struct {
+type proportionAndColor struct {
 	Proportion float64 `db:"proportion"`
 	Color      string  `db:"color"`
 }
 
-func getAverageColor(proportionsAndColors []ProportionAndColor) ([3]int, error) {
+func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) {
 	TotalProportion := 0.
 	ProportionedTotalColor := [...]float64{0, 0, 0}
 	for proportionColorIdx, _ := range proportionsAndColors {
@@ -128,26 +128,26 @@ func getAverageColor(proportionsAndColors []ProportionAndColor) ([3]int, error) 
 	return ans, nil
 }
 
-func handleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
+func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 	if session.IsNew {
 		http.Error(w, "You should be authorized to call this method", http.StatusUnauthorized)
 		return
 	}
 
-	type BriefDay struct {
+	type briefDay struct {
 		DayId        int       `db:"id" json:"id"`
 		Date         time.Time `db:"date" json:"date"`
 		AverageColor [3]int    `json:"average_color"`
 	}
-	days := make([]BriefDay, 0)
+	days := make([]briefDay, 0)
 	panicIfError(db.Select(&days, "SELECT id, date FROM days WHERE user_id=$1", session.Values["id"]))
 
 	// Retrieving average color:
 	for dayIdx, _ := range days {
 		day := &days[dayIdx]
 
-		colorsProportions := make([]ProportionAndColor, 0)
+		colorsProportions := make([]proportionAndColor, 0)
 		panicIfError(db.Select(&colorsProportions,
 			"SELECT CAST(proportion AS FLOAT), (SELECT color FROM types_of_emotions WHERE id = type_id) FROM emotions",
 		))
@@ -170,11 +170,11 @@ func handleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", handleRoot).Methods("GET")
-	r.HandleFunc("/login", handleLogin).Methods("GET", "POST")
-	r.HandleFunc("/logout", handleLogout).Methods("GET")
+	r.HandleFunc("/", HandleRoot).Methods("GET")
+	r.HandleFunc("/login", HandleLogin).Methods("GET", "POST")
+	r.HandleFunc("/logout", HandleLogout).Methods("GET")
 
-	r.HandleFunc("/api/days/brief", handleApiDaysBrief).Methods("GET")
+	r.HandleFunc("/api/days/brief", HandleApiDaysBrief).Methods("GET")
 	//r.HandleFunc("/api/days/{id:[0-9]+}")
 
 	listenAddr := "localhost:4000"
