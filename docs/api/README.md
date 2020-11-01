@@ -102,7 +102,7 @@ For `GET`: response will contain a `json` of the following scheme: `{'emotions':
 <int>}, ...], 'activities': [{'type_id': <int>, 'proportion': <int>}, ...]}`, where `type_id`s correspond to a certain
 emotion/activity, which has a name and a color. You can retrieve more info about an emotion/activity by its type id.
 
-For `POST`: request you will get a response with the `200 OK` status code
+For `DELETE`: request you will get a response with the `200 OK` status code
 
 If there is no day with the `id` identifier, you will get an error response with the `404 Not Found` status code
 
