@@ -49,64 +49,6 @@ A response with `Content-Type: text/html` is returned. Possible status codes:
 This method does not (ever) return a response with the `401 Unauthorized` status code. All the others are possible
 
 
-### `/api/days/brief`
-Get brief info about days, filled by the user you are currently logged in
-<!-- TODO: probably add some parameters limiting which days we want to retrieve (probably, dates range?) -->
-<!-- TODO: probably merge `/api/days/brief` with `/api/days`? I.e. make one endpoint with GET and POST methods -->
-
-#### Request
-Send a `GET` request
-
-#### Response
-Response will contain a `json` of the following scheme: `{'days': [{'id': <int>, 'date': <str>, 'average_color':
-[<int>, <int>, <int>]}, ...]}`, where `id` is an id of a day (you can get more info about a particular day by its id),
-`date` is the date of a day (its format is `%Y-%M-%DT00:00:00Z`) and `average_color` is an RGB color calculated as a
-proportional average between colors of emotions and activities present at a certain day.
-<!-- TODO: Remove the `T00:00:00Z` part from the date format -->
-
-
-### `/api/days`
-Add a new day
-
-#### Request
-Send a `POST` request with `Content-Type: application/x-www-form-urlencoded` with the following parameters:
-- `date` (`str`) - date of the day, formatted as `%Y-%M-%DT00:00:00Z`
-
-- `activity_type` (`int`, optional, can be used multiple times) - `type_id`s of activities of the day
-
-- `activity_proportion` (`int`, optional, must be used the same number of times `activity_type` was used) - 
-`proportion`s of activities
-
-- `emotion_type` (`int`, optional, can be used multiple times) - `type_id`s of emotions of the day
-
-- `emotion_proportion` (`int`, optional, must be used the same number of times `emotion_type` was used) - 
-`proportion`s of emotions
-
-If there is a day with the specified `date` already, you will get an error response with the `400 Bad Request` status
-code.
-
-#### Response
-Response will contain a `json` of the following scheme: `{'id': <int>}`, where `id` is the identifier of the created day
- 
- 
-### `/api/days/<id: int>`
-Either get a list of emotions/activities `type_id`s and `proportion`s of a day by its id or delete a day
-<!-- TODO: probably add a parameter to specify if we want to retrieve only activities or only emotions -->
-<!-- TODO: add day update mechanism instead of requiring to delete and add a day -->
-
-#### Request
-To get info, send a `GET` request. To delete a day, send a `DELETE` request.
-
-#### Response
-For `GET`: response will contain a `json` of the following scheme: `{'emotions': [{'type_id': <int>, 'proportion':
-<int>}, ...], 'activities': [{'type_id': <int>, 'proportion': <int>}, ...]}`, where `type_id`s correspond to a certain
-emotion/activity, which has a name and a color. You can retrieve more info about an emotion/activity by its type id.
-
-For `DELETE`: request you will get a response with the `200 OK` status code
-
-If there is no day with the `id` identifier, you will get an error response with the `404 Not Found` status code
-
-
 ### `/activities`
 Either get all activities or add a new activity
 
@@ -156,3 +98,62 @@ If there is no activity with the `id` identifier, you will get an error response
 
 ### `/emotions/<type_id: int>`
 Exactly like `/activities/<type_id: int>` (but for emotions)
+
+
+### `/api/days/brief`
+Get brief info about days, filled by the user you are currently logged in
+<!-- TODO: probably add some parameters limiting which days we want to retrieve (probably, dates range?) -->
+<!-- TODO: probably merge `/api/days/brief` with `/api/days`? I.e. make one endpoint with GET and POST methods -->
+
+#### Request
+Send a `GET` request
+
+#### Response
+Response will contain a `json` of the following scheme: `{'days': [{'id': <int>, 'date': <str>, 'average_color':
+[<int>, <int>, <int>]}, ...]}`, where `id` is an id of a day (you can get more info about a particular day by its id),
+`date` is the date of a day (its format is `%Y-%M-%DT00:00:00Z`) and `average_color` is an RGB color calculated as a
+proportional average between colors of emotions and activities present at a certain day.
+<!-- TODO: Remove the `T00:00:00Z` part from the date format -->
+
+
+### `/api/days`
+Add a new day
+
+#### Request
+Send a `POST` request with `Content-Type: application/x-www-form-urlencoded` with the following parameters:
+- `date` (`str`) - date of the day, formatted as `%Y-%M-%DT00:00:00Z`
+
+- `activity_type` (`int`, optional, can be used multiple times) - `type_id`s of activities of the day
+
+- `activity_proportion` (`int`, optional, must be used the same number of times `activity_type` was used) - 
+`proportion`s of activities
+
+- `emotion_type` (`int`, optional, can be used multiple times) - `type_id`s of emotions of the day
+
+- `emotion_proportion` (`int`, optional, must be used the same number of times `emotion_type` was used) - 
+`proportion`s of emotions
+
+If there is a day with the specified `date` already, you will get an error response with the `400 Bad Request` status
+code. If the numbers of entries of either `activity_type` and `activity_proportion` or `emotion_type` and
+`emotion_proportion` differ, you will get an error response with the `400 Bad Request` status code.
+
+#### Response
+Response will contain a `json` of the following scheme: `{'id': <int>}`, where `id` is the identifier of the created day
+ 
+ 
+### `/api/days/<id: int>`
+Either get a list of emotions/activities `type_id`s and `proportion`s of a day by its id or delete a day
+<!-- TODO: probably add a parameter to specify if we want to retrieve only activities or only emotions -->
+<!-- TODO: add day update mechanism instead of requiring to delete and add a day -->
+
+#### Request
+To get info, send a `GET` request. To delete a day, send a `DELETE` request.
+
+#### Response
+For `GET`: response will contain a `json` of the following scheme: `{'emotions': [{'type_id': <int>, 'proportion':
+<int>}, ...], 'activities': [{'type_id': <int>, 'proportion': <int>}, ...]}`, where `type_id`s correspond to a certain
+emotion/activity, which has a name and a color. You can retrieve more info about an emotion/activity by its type id.
+
+For `DELETE`: request you will get a response with the `200 OK` status code
+
+If there is no day with the `id` identifier, you will get an error response with the `404 Not Found` status code
