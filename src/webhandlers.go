@@ -23,13 +23,8 @@ var requestsDecoder = schema.NewDecoder()
 var MaxProportion = 100.
 
 func loadHtmlTemplates() (*template.Template, error) {
-	if err := os.Chdir("src/templates"); err != nil {
-		return nil, err
-	}
-	defer os.Chdir("../..")
-
 	tmpl := template.New("HTML templates")
-	return tmpl.ParseFiles("index.html", "login.html")
+	return tmpl.ParseFiles("src/templates/index.html", "src/templates/login.html")
 }
 
 func init() {
