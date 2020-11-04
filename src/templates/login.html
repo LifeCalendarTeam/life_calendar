@@ -1,0 +1,19 @@
+{{define "GET /login"}}
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Login page</title>
+	</head>
+
+	<body>
+	<h1>Do you remember your credentials? &#128561;</h1>
+	<p>
+	<form method="POST" enctype="application/x-www-form-urlencoded">
+		<input name="user_id" placeholder="Your ID" required><br>
+		<input name="password" type="password" placeholder="Your Password" required><br>
+		<button type="submit">Log in!</button>
+	</form>
+	</p>
+	</body>
+	</html>
+{{end}}
