@@ -22,7 +22,7 @@ var cookieStorage *sessions.CookieStore
 var requestsDecoder = schema.NewDecoder()
 var MaxProportion = 100.
 
-func loadHtmlTemplates() (*template.Template, error) {
+func loadHTMLTemplates() (*template.Template, error) {
 	tmpl := template.New("HTML templates")
 	return tmpl.ParseFiles("src/templates/index.html", "src/templates/login.html")
 }
@@ -30,7 +30,7 @@ func loadHtmlTemplates() (*template.Template, error) {
 func init() {
 	var err error
 
-	tmpl, err = loadHtmlTemplates()
+	tmpl, err = loadHTMLTemplates()
 	panicIfError(err)
 
 	var cookieKey []byte
@@ -62,7 +62,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 		if true { // Password must be checked here!!
 			session, _ := cookieStorage.Get(r, "session")
-			session.Values["id"] = person.UserId
+			session.Values["id"] = person.UserID
 			session.Values["expires"] = time.Now().Add(24 * time.Hour).Unix()
 			panicIfError(session.Save(r, w))
 
