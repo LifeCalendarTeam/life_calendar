@@ -49,11 +49,6 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	type loginForm struct {
-		UserId   int    `schema:"user_id,required"`
-		Password string `schema:"password,required"`
-	}
-
 	if r.Method == "GET" {
 		panicIfError(tmpl.ExecuteTemplate(w, "GET /login", nil))
 	} else {
@@ -84,11 +79,6 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	panicIfError(session.Save(r, w))
 
 	http.Redirect(w, r, "..", 302)
-}
-
-type proportionAndColor struct {
-	Proportion float64 `db:"proportion"`
-	Color      string  `db:"color"`
 }
 
 func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) {
@@ -130,11 +120,6 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type briefDay struct {
-		DayId        int       `db:"id" json:"id"`
-		Date         time.Time `db:"date" json:"date"`
-		AverageColor [3]int    `json:"average_color"`
-	}
 	days := make([]briefDay, 0)
 	panicIfError(db.Select(&days, "SELECT id, date FROM days WHERE user_id=$1", session.Values["id"]))
 

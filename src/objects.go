@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Logical objects:
+
 type User struct {
 	Id           int            `db:"id"`
 	FirstName    string         `db:"first_name"`
@@ -21,14 +23,6 @@ type Day struct {
 	Date   time.Time `db:"date"`
 }
 
-type Activity struct {
-	TypeId     int `db:"type_id"`
-	DayId      int `db:"day_id"`
-	Proportion int `db:"proportion"`
-}
-
-type Emotion Activity
-
 type ActivityType struct {
 	Id         int    `db:"id"`
 	UserId     int    `db:"user_id"`
@@ -38,3 +32,31 @@ type ActivityType struct {
 }
 
 type EmotionType ActivityType
+
+type Activity struct {
+	TypeId     int `db:"type_id"`
+	DayId      int `db:"day_id"`
+	Proportion int `db:"proportion"`
+}
+
+type Emotion Activity
+
+// Forms:
+
+type loginForm struct {
+	UserId   int    `schema:"user_id,required"`
+	Password string `schema:"password,required"`
+}
+
+// Internal objects:
+
+type proportionAndColor struct {
+	Proportion float64 `db:"proportion"`
+	Color      string  `db:"color"`
+}
+
+type briefDay struct {
+	DayId        int       `db:"id" json:"id"`
+	Date         time.Time `db:"date" json:"date"`
+	AverageColor [3]int    `json:"average_color"`
+}
