@@ -7,6 +7,7 @@ import (
 
 // Logical objects:
 
+// User object describes a user of LifeCalendar (identifier, profile info, password hash)
 type User struct {
 	Id           int            `db:"id"`
 	FirstName    string         `db:"first_name"`
@@ -17,12 +18,14 @@ type User struct {
 	PasswordHash string         `db:"password_hash"`
 }
 
+// Day object describes a day (identifier, user identifier, date)
 type Day struct {
 	Id     int       `db:"id"`
 	UserId int       `db:"user_id"`
 	Date   time.Time `db:"date"`
 }
 
+// ActivityType describing describes an activity type (identifier, user identifier, name/label, color, is it everyday)
 type ActivityType struct {
 	Id         int    `db:"id"`
 	UserId     int    `db:"user_id"`
@@ -31,14 +34,17 @@ type ActivityType struct {
 	IsEveryday bool   `db:"is_everyday"`
 }
 
+// EmotionType object describes an emotion type (semantically similar to `ActivityType`)
 type EmotionType ActivityType
 
+// Activity object describes an activity (type identifier, day identifier, proportion value)
 type Activity struct {
 	TypeId     int `db:"type_id"`
 	DayId      int `db:"day_id"`
 	Proportion int `db:"proportion"`
 }
 
+// Emotion object describes an emotion (semantically similar to `Activity`)
 type Emotion Activity
 
 // Forms:
