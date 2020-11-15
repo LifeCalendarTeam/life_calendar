@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// APIPanicHandlerMiddleware is an HTTP middleware, handling panic and sending the error json as a response in case of
+// errors
 func APIPanicHandlerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -29,6 +31,8 @@ func APIPanicHandlerMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// UIPanicHandlerMiddleware is an HTTP middleware, handling panic and sending the user-readable error page as a response
+// in case of errors
 func UIPanicHandlerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
