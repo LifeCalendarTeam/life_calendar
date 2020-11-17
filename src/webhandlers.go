@@ -144,11 +144,8 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 
 		colorsProportions := make([]proportionAndColor, 0)
 		panicIfError(db.Select(&colorsProportions,
-			"SELECT CAST(proportion AS FLOAT), (SELECT color FROM types_of_emotions WHERE id = type_id) FROM emotions",
-		))
-		panicIfError(db.Select(&colorsProportions,
-			"SELECT CAST(proportion AS FLOAT), (SELECT color FROM types_of_activities WHERE id = type_id) "+
-				"FROM activities",
+			"SELECT CAST(proportion AS FLOAT), (SELECT color FROM types_of_activities_and_emotions "+
+				"WHERE id=type_id) FROM activities_and_emotions",
 		))
 
 		var err error

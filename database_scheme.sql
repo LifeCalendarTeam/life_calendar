@@ -30,4 +30,3 @@ CREATE TABLE "activities_and_emotions" (
   "day_id" integer REFERENCES days NOT NULL,
   "proportion" integer NOT NULL
 );
-
