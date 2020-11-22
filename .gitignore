@@ -129,3 +129,4 @@ modules.xml
 # Project-level:
 config/**
 !config/**example**
+node_modules/
