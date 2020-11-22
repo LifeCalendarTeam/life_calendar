@@ -172,6 +172,17 @@ func main() {
 	r.HandleFunc("/api/days/brief", HandleApiDaysBrief).Methods("GET")
 	//r.HandleFunc("/api/days/{id:[0-9]+}")
 
+	//r.Handle("/src", )
+	r.HandleFunc("/scripts/*", func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = r.URL.Path[len("/scripts"):]
+		http.FileServer(http.Dir("src/scripts")).ServeHTTP(w, r)
+	})
+
+	r.PathPrefix("/scripts/").Handler(http.StripPrefix("/scripts/", http.FileServer(http.Dir("src/scripts")))).
+		Methods("GET")
+
+	// TODO: change style: use `r.Methods(...).Handle...` instead of `r.Handle....Methods(...)`
+
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
 	panic(http.ListenAndServe(listenAddr, r))
