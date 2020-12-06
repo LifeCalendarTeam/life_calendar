@@ -165,11 +165,11 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", HandleRoot).Methods("GET")
-	r.HandleFunc("/login", HandleLogin).Methods("GET", "POST")
-	r.HandleFunc("/logout", HandleLogout).Methods("GET")
+	r.Path("/").Methods("GET").HandlerFunc(HandleRoot)
+	r.Path("/login").Methods("GET", "POST").HandlerFunc(HandleLogin)
+	r.Path("/logout").Methods("GET").HandlerFunc(HandleLogout)
 
-	r.HandleFunc("/api/days/brief", HandleApiDaysBrief).Methods("GET")
+	r.Path("/api/days/brief").Methods("GET").HandlerFunc(HandleApiDaysBrief)
 	//r.HandleFunc("/api/days/{id:[0-9]+}")
 
 	listenAddr := "localhost:4000"
