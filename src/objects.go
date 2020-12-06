@@ -21,6 +21,7 @@ type Day struct {
 	Date   time.Time `db:"date"`
 }
 
+// ActivityOrEmotion object describes an activity/emotion (type identifier, day identifier, proportion value)
 type ActivityOrEmotion struct {
 	TypeId     int `db:"type_id"`
 	DayId      int `db:"day_id"`
@@ -28,6 +29,8 @@ type ActivityOrEmotion struct {
 	// TODO: probably needs a field telling whether it's an activity or an emotion
 }
 
+// ActivityOrEmotionType describes an activity/emotion type (identifier, user identifier, name/label, color, is it
+// everyday)
 type ActivityOrEmotionType struct {
 	Id         int    `db:"id"`
 	UserId     int    `db:"user_id"`
