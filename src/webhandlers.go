@@ -160,16 +160,16 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	panicIfError(err)
 }
 
-func HandleApiDaysId(w http.ResponseWriter, r *http.Request) {
+func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
 
 	// `err` should never occur because Gorilla should have rejected the request before calling the handler if `id` is
 	// not an int
 	panicIfError(err)
 
-	b_ := make([]bool, 0)
-	panicIfError(db.Select(&b_, "SELECT EXISTS(SELECT 1 FROM days WHERE id=$1)", id))
-	dayExists := b_[0]
+	b := make([]bool, 0)
+	panicIfError(db.Select(&b, "SELECT EXISTS(SELECT 1 FROM days WHERE id=$1)", id))
+	dayExists := b[0]
 
 	var js []byte
 	var status = http.StatusOK
@@ -202,7 +202,7 @@ func main() {
 	r.Path("/logout").Methods("GET").HandlerFunc(HandleLogout)
 
 	r.Path("/api/days/brief").Methods("GET").HandlerFunc(HandleApiDaysBrief)
-	r.Path("/api/days/{id:[0-9]+}").Methods("GET", "DELETE").HandlerFunc(HandleApiDaysId)
+	r.Path("/api/days/{id:[0-9]+}").Methods("GET", "DELETE").HandlerFunc(HandleAPIDaysID)
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
