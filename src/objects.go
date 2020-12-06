@@ -21,20 +21,18 @@ type Day struct {
 	Date   time.Time `db:"date"`
 }
 
-type Activity struct {
+type ActivityOrEmotion struct {
 	TypeId     int `db:"type_id"`
 	DayId      int `db:"day_id"`
 	Proportion int `db:"proportion"`
+	// TODO: probably needs a field telling whether it's an activity or an emotion
 }
 
-type Emotion Activity
-
-type ActivityType struct {
+type ActivityOrEmotionType struct {
 	Id         int    `db:"id"`
 	UserId     int    `db:"user_id"`
 	Name       string `db:"name"`
 	Color      string `db:"color"`
 	IsEveryday bool   `db:"is_everyday"`
+	// TODO: probably needs a field telling whether it's an activity or an emotion
 }
-
-type EmotionType ActivityType
