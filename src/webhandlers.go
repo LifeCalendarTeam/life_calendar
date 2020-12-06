@@ -160,6 +160,41 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	panicIfError(err)
 }
 
+func HandleApiDaysId(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+
+	// `err` should never occur because Gorilla should have rejected the request before calling the handler if `id` is
+	// not an int
+	panicIfError(err)
+
+	b_ := make([]bool, 0)
+	panicIfError(db.Select(&b_, "SELECT EXISTS(SELECT 1 FROM days WHERE id=$1)", id))
+	dayExists := b_[0]
+
+	var js []byte
+	var status = http.StatusOK
+
+	if dayExists {
+		if r.Method == "DELETE" {
+			_, err = db.Exec("DELETE FROM days WHERE id=$1", id)
+			if err == nil {
+				js, err = json.Marshal(map[string]interface{}{"ok": true})
+			}
+		} else {
+			panic(errors.New("GET is not implemented yet"))
+		}
+	} else {
+		js, err = json.Marshal(map[string]interface{}{"ok": false, "error": "Day does not exist"})
+		status = http.StatusNotFound
+	}
+
+	panicIfError(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, err = w.Write(js)
+	panicIfError(err)
+}
+
 func main() {
 	r := mux.NewRouter()
 	r.Path("/").Methods("GET").HandlerFunc(HandleRoot)
@@ -167,7 +202,7 @@ func main() {
 	r.Path("/logout").Methods("GET").HandlerFunc(HandleLogout)
 
 	r.Path("/api/days/brief").Methods("GET").HandlerFunc(HandleApiDaysBrief)
-	//r.HandleFunc("/api/days/{id:[0-9]+}")
+	r.Path("/api/days/{id:[0-9]+}").Methods("GET", "DELETE").HandlerFunc(HandleApiDaysId)
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)

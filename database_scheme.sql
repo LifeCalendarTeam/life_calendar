@@ -27,6 +27,6 @@ CREATE TABLE "types_of_activities_and_emotions" (
 
 CREATE TABLE "activities_and_emotions" (
   "type_id" integer REFERENCES types_of_activities_and_emotions NOT NULL,
-  "day_id" integer REFERENCES days NOT NULL,
+  "day_id" integer REFERENCES days ON DELETE CASCADE NOT NULL,
   "proportion" integer NOT NULL
 );
