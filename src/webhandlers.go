@@ -155,9 +155,7 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 
 	js, err := json.Marshal(days)
 	panicIfError(err)
-	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(js)
-	panicIfError(err)
+	writeJSON(w, js, http.StatusOK)
 }
 
 func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
@@ -189,10 +187,7 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	panicIfError(err)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_, err = w.Write(js)
-	panicIfError(err)
+	writeJSON(w, js, status)
 }
 
 func main() {
