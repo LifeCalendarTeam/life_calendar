@@ -125,11 +125,7 @@ func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) 
 
 func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
-	if session.IsNew {
-		js, err := json.Marshal(map[string]interface{}{"ok": false,
-			"error": "You must be authorized to call this method"})
-		panicIfError(err)
-		writeJSON(w, js, http.StatusUnauthorized)
+	if dropAPIRequestIfUnauthorized(session, w) {
 		return
 	}
 
@@ -168,11 +164,7 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 	panicIfError(err)
 
 	session, _ := cookieStorage.Get(r, "session")
-	if session.IsNew {
-		js, err := json.Marshal(map[string]interface{}{"ok": false,
-			"error": "You must be authorized to call this method"})
-		panicIfError(err)
-		writeJSON(w, js, http.StatusUnauthorized)
+	if dropAPIRequestIfUnauthorized(session, w) {
 		return
 	}
 
