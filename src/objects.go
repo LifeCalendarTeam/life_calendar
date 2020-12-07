@@ -39,9 +39,9 @@ type Day struct {
 }
 
 type ActivityOrEmotion struct {
-	TypeId     int `db:"type_id"`
-	DayId      int `db:"day_id"`
-	Proportion int `db:"proportion"`
+	TypeId     int `db:"type_id" json:"type_id,omitempty"`
+	DayId      int `db:"day_id" json:"day_id,omitempty"`
+	Proportion int `db:"proportion" json:"proportion,omitempty"`
 }
 
 type ActivityOrEmotionType struct {
@@ -50,5 +50,12 @@ type ActivityOrEmotionType struct {
 	Name       string                   `db:"name"`
 	Color      string                   `db:"color"`
 	IsEveryday bool                     `db:"is_everyday"`
+	EntityType WhetherActivityOrEmotion `db:"activity_or_emotion"`
+}
+
+// Internal objects
+
+type activityOrEmotionWithType struct {
+	ActivityOrEmotion
 	EntityType WhetherActivityOrEmotion `db:"activity_or_emotion"`
 }

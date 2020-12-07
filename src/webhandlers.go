@@ -179,7 +179,23 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 				js, err = json.Marshal(map[string]interface{}{"ok": true})
 			}
 		} else {
-			panic(errors.New("GET is not implemented yet"))
+			activitiesAndEmotions := make([]activityOrEmotionWithType, 0)
+			panicIfError(db.Select(&activitiesAndEmotions, "SELECT type_id, proportion, "+
+				"(SELECT activity_or_emotion FROM types_of_activities_and_emotions WHERE id=type_id) FROM "+
+				"activities_and_emotions WHERE day_id=$1", id))
+
+			activities := make([]ActivityOrEmotion, 0, len(activitiesAndEmotions))
+			emotions := make([]ActivityOrEmotion, 0, len(activitiesAndEmotions))
+			for _, entity := range activitiesAndEmotions {
+				entity.DayId = 0 // Hide the field in JSON
+				if entity.EntityType == EntityTypeActivity {
+					activities = append(activities, entity.ActivityOrEmotion)
+				} else {
+					emotions = append(emotions, entity.ActivityOrEmotion)
+				}
+			}
+
+			js, err = json.Marshal(map[string]interface{}{"ok": true, "activities": activities, "emotions": emotions})
 		}
 	} else {
 		js, err = json.Marshal(map[string]interface{}{"ok": false, "error": "Day does not exist"})
