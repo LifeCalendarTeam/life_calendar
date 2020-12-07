@@ -126,7 +126,10 @@ func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) 
 func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 	if session.IsNew {
-		http.Error(w, "You should be authorized to call this method", http.StatusUnauthorized)
+		js, err := json.Marshal(map[string]interface{}{"ok": false,
+			"error": "You must be authorized to call this method"})
+		panicIfError(err)
+		writeJSON(w, js, http.StatusUnauthorized)
 		return
 	}
 
@@ -165,6 +168,13 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 	panicIfError(err)
 
 	session, _ := cookieStorage.Get(r, "session")
+	if session.IsNew {
+		js, err := json.Marshal(map[string]interface{}{"ok": false,
+			"error": "You must be authorized to call this method"})
+		panicIfError(err)
+		writeJSON(w, js, http.StatusUnauthorized)
+		return
+	}
 
 	b := make([]bool, 0)
 	panicIfError(db.Select(&b, "SELECT EXISTS(SELECT 1 FROM days WHERE id=$1 AND user_id=$2)", id,
