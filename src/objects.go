@@ -25,27 +25,24 @@ type Day struct {
 	Date   time.Time `db:"date"`
 }
 
-// ActivityType describing describes an activity type (identifier, user identifier, name/label, color, is it everyday)
-type ActivityType struct {
-	ID         int    `db:"id"`
-	UserID     int    `db:"user_id"`
+// ActivityOrEmotion object describes an activity/emotion (type identifier, day identifier, proportion value)
+type ActivityOrEmotion struct {
+	TypeId     int `db:"type_id"`
+	DayId      int `db:"day_id"`
+	Proportion int `db:"proportion"`
+	// TODO: probably needs a field telling whether it's an activity or an emotion
+}
+
+// ActivityOrEmotionType describes an activity/emotion type (identifier, user identifier, name/label, color, is it
+// everyday)
+type ActivityOrEmotionType struct {
+	Id         int    `db:"id"`
+	UserId     int    `db:"user_id"`
 	Name       string `db:"name"`
 	Color      string `db:"color"`
 	IsEveryday bool   `db:"is_everyday"`
+	// TODO: probably needs a field telling whether it's an activity or an emotion
 }
-
-// EmotionType object describes an emotion type (semantically similar to `ActivityType`)
-type EmotionType ActivityType
-
-// Activity object describes an activity (type identifier, day identifier, proportion value)
-type Activity struct {
-	TypeID     int `db:"type_id"`
-	DayId      int `db:"day_id"`
-	Proportion int `db:"proportion"`
-}
-
-// Emotion object describes an emotion (semantically similar to `Activity`)
-type Emotion Activity
 
 // Forms:
 
