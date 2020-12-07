@@ -24,7 +24,7 @@ var MaxProportion = 100.
 
 func loadHtmlTemplates() (*template.Template, error) {
 	tmpl := template.New("HTML templates")
-	return tmpl.ParseFiles("src/templates/index.html", "src/templates/login.html")
+	return tmpl.ParseFiles("src/templates/index.html", "src/templates/login.html", "src/templates/500.html")
 }
 
 func init() {
@@ -156,7 +156,7 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 		panicIfError(err)
 	}
 
-	js, err := json.Marshal(days)
+	js, err := json.Marshal(map[string]interface{}{"ok": true, "days": days})
 	panicIfError(err)
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(js)
@@ -164,15 +164,25 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", HandleRoot).Methods("GET")
-	r.HandleFunc("/login", HandleLogin).Methods("GET", "POST")
-	r.HandleFunc("/logout", HandleLogout).Methods("GET")
+	ui := mux.NewRouter()
 
-	r.HandleFunc("/api/days/brief", HandleApiDaysBrief).Methods("GET")
-	//r.HandleFunc("/api/days/{id:[0-9]+}")
+	ui.HandleFunc("/", HandleRoot).Methods("GET")
+	ui.HandleFunc("/login", HandleLogin).Methods("GET", "POST")
+	ui.HandleFunc("/logout", HandleLogout).Methods("GET")
+
+	api := mux.NewRouter()
+
+	api.HandleFunc("/api/2", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hi..."))
+	})
+	api.HandleFunc("/api/days/brief", HandleApiDaysBrief).Methods("GET")
+	//api.HandleFunc("/api/days/{id:[0-9]+}")
+
+	final := http.NewServeMux()
+	final.Handle("/", UIPanicHandlerMiddleware(ui))
+	final.Handle("/api/", APIPanicHandlerMiddleware(api))
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
-	panic(http.ListenAndServe(listenAddr, r))
+	panic(http.ListenAndServe(listenAddr, final))
 }
