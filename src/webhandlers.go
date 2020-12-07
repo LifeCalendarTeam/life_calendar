@@ -94,7 +94,7 @@ type proportionAndColor struct {
 func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) {
 	TotalProportion := 0.
 	ProportionedTotalColor := [...]float64{0, 0, 0}
-	for proportionColorIdx, _ := range proportionsAndColors {
+	for proportionColorIdx := range proportionsAndColors {
 		proportionColor := &proportionsAndColors[proportionColorIdx]
 
 		TotalProportion += proportionColor.Proportion
@@ -114,7 +114,7 @@ func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) 
 	ans := [3]int{0, 0, 0}
 
 	if TotalProportion != 0 {
-		for idx, _ := range ProportionedTotalColor {
+		for idx := range ProportionedTotalColor {
 			absoluteColor := ProportionedTotalColor[idx] * MaxProportion / TotalProportion
 			ans[idx] = int(math.Round(absoluteColor))
 		}
@@ -139,7 +139,7 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	panicIfError(db.Select(&days, "SELECT id, date FROM days WHERE user_id=$1", session.Values["id"]))
 
 	// Retrieving average color:
-	for dayIdx, _ := range days {
+	for dayIdx := range days {
 		day := &days[dayIdx]
 
 		colorsProportions := make([]proportionAndColor, 0)
