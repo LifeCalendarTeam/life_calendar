@@ -39,8 +39,8 @@ type Day struct {
 }
 
 type ActivityOrEmotion struct {
-	TypeId     int `db:"type_id" json:"type_id,omitempty"`
-	DayId      int `db:"day_id" json:"day_id,omitempty"`
+	TypeID     int `db:"type_id" json:"type_id,omitempty"`
+	DayID      int `db:"day_id" json:"day_id,omitempty"`
 	Proportion int `db:"proportion" json:"proportion,omitempty"`
 }
 

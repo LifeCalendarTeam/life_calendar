@@ -191,7 +191,7 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 			activities := make([]ActivityOrEmotion, 0, len(activitiesAndEmotions))
 			emotions := make([]ActivityOrEmotion, 0, len(activitiesAndEmotions))
 			for _, entity := range activitiesAndEmotions {
-				entity.DayId = 0 // Hide the field in JSON
+				entity.DayID = 0 // Hide the field in JSON
 				if entity.EntityType == EntityTypeActivity {
 					activities = append(activities, entity.ActivityOrEmotion)
 				} else {
