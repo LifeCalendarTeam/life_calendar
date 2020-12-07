@@ -156,4 +156,5 @@ emotion/activity, which has a name and a color. You can retrieve more info about
 
 For `DELETE`: request you will get a response with the `200 OK` status code
 
-If there is no day with the `id` identifier, you will get an error response with the `404 Not Found` status code
+If there is no day with the `id` identifier, or it is a day of another user, you will get an error response with the
+ `404 Not Found` status code

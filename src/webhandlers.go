@@ -160,13 +160,15 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 
 func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
-
 	// `err` should never occur because Gorilla should have rejected the request before calling the handler if `id` is
 	// not an int
 	panicIfError(err)
 
+	session, _ := cookieStorage.Get(r, "session")
+
 	b := make([]bool, 0)
-	panicIfError(db.Select(&b, "SELECT EXISTS(SELECT 1 FROM days WHERE id=$1)", id))
+	panicIfError(db.Select(&b, "SELECT EXISTS(SELECT 1 FROM days WHERE id=$1 AND user_id=$2)", id,
+		session.Values["id"]))
 	dayExists := b[0]
 
 	var js []byte
