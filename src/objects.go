@@ -21,20 +21,21 @@ type Day struct {
 	Date   time.Time `db:"date"`
 }
 
-type Activity struct {
+// ActivityOrEmotion object describes an activity/emotion (type identifier, day identifier, proportion value)
+type ActivityOrEmotion struct {
 	TypeId     int `db:"type_id"`
 	DayId      int `db:"day_id"`
 	Proportion int `db:"proportion"`
+	// TODO: probably needs a field telling whether it's an activity or an emotion
 }
 
-type Emotion Activity
-
-type ActivityType struct {
+// ActivityOrEmotionType describes an activity/emotion type (identifier, user identifier, name/label, color, is it
+// everyday)
+type ActivityOrEmotionType struct {
 	Id         int    `db:"id"`
 	UserId     int    `db:"user_id"`
 	Name       string `db:"name"`
 	Color      string `db:"color"`
 	IsEveryday bool   `db:"is_everyday"`
+	// TODO: probably needs a field telling whether it's an activity or an emotion
 }
-
-type EmotionType ActivityType
