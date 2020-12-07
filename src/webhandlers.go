@@ -217,9 +217,6 @@ func main() {
 	ui.Path("/logout").Methods("GET").HandlerFunc(HandleLogout)
 
 	api := mux.NewRouter()
-	api.HandleFunc("/api/2", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hi..."))
-	})
 	api.Path("/api/days/brief").Methods("GET").HandlerFunc(HandleApiDaysBrief)
 	api.Path("/api/days/{id:[0-9]+}").Methods("GET", "DELETE").HandlerFunc(HandleAPIDaysID)
 
