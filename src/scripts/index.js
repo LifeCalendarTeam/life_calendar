@@ -6,7 +6,7 @@ var dayButtons = new Vue({
     },
 
     methods: {
-        RGBColorToHex(color) {
+        toHexFromRGB(color) {
             function convertToHex(c) {
                 let hex = c.toString(16);
                 return hex.length === 1 ? "0" + hex : hex;
@@ -26,7 +26,7 @@ var dayButtons = new Vue({
         getFilledDayColor(day) {
             for(let filledDay of this.days) {
                 if(Date.parse(filledDay.date) === Date.parse(day.toISOString())) {
-                    return this.RGBColorToHex(filledDay.average_color);
+                    return this.toHexFromRGB(filledDay.average_color);
                 }
             }
             return "#a9a9a9";
@@ -60,7 +60,7 @@ var dayButtons = new Vue({
             }
         })
         .catch(function(error) {
-            console.log(error);
+            console.error(error);
         });
     }
 
