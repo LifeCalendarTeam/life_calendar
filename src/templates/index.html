@@ -18,10 +18,7 @@
 </style>
 
 <body class="w3-content" style="max-width:1200px">
-{{if not .}}
-    Unfortunately, you are not logged in now :(<br>
-    <a href="/login">Log in!</a>
-{{else}}
+{{if .}}
     <!-- Sidebar/menu -->
     <nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:3;width:265px" id="mySidebar">
         <div class="w3-container w3-display-container w3-padding-16">
@@ -86,6 +83,9 @@
             document.getElementById("myOverlay").style.display = "none";
         }
     </script>
+{{else}}
+    Unfortunately, you are not logged in now :(<br>
+    <a href="/login">Log in!</a>
 {{end}}
 </body>
 </html>
