@@ -57,11 +57,9 @@
             <table cols=7 class="w3-table">
                 <tr v-for="week in getDisplayedWeeks()">
                     <td v-for="day in week">
-                        <!--<a v-bind:href="getDayUrl(day)">-->
                         <div class="w3-col square" v-if="isDayFilled(day)"
-                             v-bind:style="{backgroundColor: colorToHex(getFilledDayColor(day))}"></div>
-                        <div class="w3-col square" v-else style="background-color: darkgrey"></div>
-                        <!--</a>-->
+                             v-bind:style="{backgroundColor: getFilledDayColor(day)}"></div>
+                        <div class="w3-col square" v-else style="background-color: #a9a9a9"></div>
                     </td>
                 </tr>
             </table>

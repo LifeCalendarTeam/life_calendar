@@ -6,12 +6,12 @@ var dayButtons = new Vue({
     },
 
     methods: {
-        colorToHex(color) {
-            function compToHex(c) {
+        RGBColorToHex(color) {
+            function convertToHex(c) {
                 let hex = c.toString(16);
                 return hex.length === 1 ? "0" + hex : hex;
             }
-            return "#" + compToHex(color[0]) + compToHex(color[1]) + compToHex(color[2]);
+            return "#" + convertToHex(color[0]) + convertToHex(color[1]) + convertToHex(color[2]);
         },
 
         isDayFilled(day) {
@@ -26,24 +26,22 @@ var dayButtons = new Vue({
         getFilledDayColor(day) {
             for(let filledDay of this.days) {
                 if(Date.parse(filledDay.date) === Date.parse(day.toISOString())) {
-                    return filledDay.average_color;
+                    return this.RGBColorToHex(filledDay.average_color);
                 }
             }
-            return [169, 169, 169];
+            return "#a9a9a9";
         },
 
         getDisplayedWeeks() {
             let closestSunday = new Date();
             closestSunday = new Date(Date.UTC(closestSunday.getFullYear(), closestSunday.getMonth(),
                 closestSunday.getDate() + 7 - closestSunday.getDay()));
-            let threeWeeks = [];
-            for(let i = 2; i >= 0; --i) {
-                let currentWeek = [];
-                for(let j = 6; j >= 0; --j) {
-                    currentWeek.push(new Date(closestSunday));
-                    currentWeek[6 - j].setUTCDate(closestSunday.getUTCDate() - j - i * 7);
+            let threeWeeks = Array.from(Array(3), () => new Array(7));
+            for(let i = 0; i < 3; ++i) {
+                for(let j = 0; j < 7; ++j) {
+                    threeWeeks[i][j] = new Date(closestSunday);
+                    threeWeeks[i][j].setUTCDate(closestSunday.getUTCDate() - 20 + i * 7 + j);
                 }
-                threeWeeks.push(currentWeek);
             }
             return threeWeeks;
         }
