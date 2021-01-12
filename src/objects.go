@@ -22,8 +22,9 @@ const (
 
 // Logical objects
 
+// User object describes a user of LifeCalendar (identifier, profile info, password hash)
 type User struct {
-	Id           int            `db:"id"`
+	ID           int            `db:"id"`
 	FirstName    string         `db:"first_name"`
 	LastName     string         `db:"second_name"`
 	City         sql.NullString `db:"city"`
@@ -32,9 +33,10 @@ type User struct {
 	PasswordHash string         `db:"password_hash"`
 }
 
+// Day object describes a day (identifier, user identifier, date)
 type Day struct {
-	Id     int       `db:"id"`
-	UserId int       `db:"user_id"`
+	ID     int       `db:"id"`
+	UserID int       `db:"user_id"`
 	Date   time.Time `db:"date"`
 }
 
@@ -61,4 +63,24 @@ type ActivityOrEmotionType struct {
 type activityOrEmotionWithType struct {
 	ActivityOrEmotion
 	EntityType WhetherActivityOrEmotion `db:"activity_or_emotion"`
+}
+
+// Forms:
+
+type loginForm struct {
+	UserID   int    `schema:"user_id,required"`
+	Password string `schema:"password,required"`
+}
+
+// Internal objects:
+
+type proportionAndColor struct {
+	Proportion float64 `db:"proportion"`
+	Color      string  `db:"color"`
+}
+
+type briefDay struct {
+	DayID        int       `db:"id" json:"id"`
+	Date         time.Time `db:"date" json:"date"`
+	AverageColor [3]int    `json:"average_color"`
 }

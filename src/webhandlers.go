@@ -22,7 +22,7 @@ var cookieStorage *sessions.CookieStore
 var requestsDecoder = schema.NewDecoder()
 var MaxProportion = 100.
 
-func loadHtmlTemplates() (*template.Template, error) {
+func loadHTMLTemplates() (*template.Template, error) {
 	tmpl := template.New("HTML templates")
 	return tmpl.ParseFiles("src/templates/index.html", "src/templates/login.html", "src/templates/500.html")
 }
@@ -30,7 +30,7 @@ func loadHtmlTemplates() (*template.Template, error) {
 func init() {
 	var err error
 
-	tmpl, err = loadHtmlTemplates()
+	tmpl, err = loadHTMLTemplates()
 	panicIfError(err)
 
 	var cookieKey []byte
@@ -49,11 +49,6 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	type loginForm struct {
-		UserId   int    `schema:"user_id,required"`
-		Password string `schema:"password,required"`
-	}
-
 	if r.Method == "GET" {
 		panicIfError(tmpl.ExecuteTemplate(w, "GET /login", nil))
 	} else {
@@ -67,7 +62,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 		if true { // Password must be checked here!!
 			session, _ := cookieStorage.Get(r, "session")
-			session.Values["id"] = person.UserId
+			session.Values["id"] = person.UserID
 			session.Values["expires"] = time.Now().Add(24 * time.Hour).Unix()
 			panicIfError(session.Save(r, w))
 
@@ -84,11 +79,6 @@ func HandleLogout(w http.ResponseWriter, r *http.Request) {
 	panicIfError(session.Save(r, w))
 
 	http.Redirect(w, r, "..", 302)
-}
-
-type proportionAndColor struct {
-	Proportion float64 `db:"proportion"`
-	Color      string  `db:"color"`
 }
 
 func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) {
@@ -129,11 +119,6 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type briefDay struct {
-		DayId        int       `db:"id" json:"id"`
-		Date         time.Time `db:"date" json:"date"`
-		AverageColor [3]int    `json:"average_color"`
-	}
 	days := make([]briefDay, 0)
 	panicIfError(db.Select(&days, "SELECT id, date FROM days WHERE user_id=$1", session.Values["id"]))
 
@@ -144,7 +129,7 @@ func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 		colorsProportions := make([]proportionAndColor, 0)
 		panicIfError(db.Select(&colorsProportions,
 			"SELECT CAST(proportion AS FLOAT), (SELECT color FROM types_of_activities_and_emotions "+
-				"WHERE id=type_id) FROM activities_and_emotions WHERE day_id=$1", day.DayId,
+				"WHERE id=type_id) FROM activities_and_emotions WHERE day_id=$1", day.DayID,
 		))
 
 		var err error
