@@ -9,13 +9,12 @@ import (
 
 // User object describes a user of LifeCalendar (identifier, profile info, password hash)
 type User struct {
-	ID           int            `db:"id"`
-	FirstName    string         `db:"first_name"`
-	LastName     string         `db:"second_name"`
-	City         sql.NullString `db:"city"`
-	Birthday     sql.NullTime   `db:"birthday"`
-	Avatar       sql.NullString `db:"avatar"`
-	PasswordHash string         `db:"password_hash"`
+	ID        int            `db:"id"`
+	FirstName string         `db:"first_name"`
+	LastName  string         `db:"second_name"`
+	City      sql.NullString `db:"city"`
+	Birthday  sql.NullTime   `db:"birthday"`
+	Avatar    sql.NullString `db:"avatar"`
 }
 
 // Day object describes a day (identifier, user identifier, date)

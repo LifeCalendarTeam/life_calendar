@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/schema"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"math"
 	"net/http"
@@ -60,7 +61,19 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Looks like you have sent incorrect data", http.StatusBadRequest)
 		}
 
-		if true { // Password must be checked here!!
+		// Making `passwordHash` a slice of strings instead of just a string because we can only scan from SQL to a
+		// slice. In fact the length of `passwordHash` will always be either 0 (if user doesn't exist) or 1
+		passwordHash := make([]string, 0, 1)
+
+		panicIfError(db.Select(&passwordHash, "SELECT password_hash FROM users WHERE id=$1", person.UserID))
+		if len(passwordHash) == 0 {
+			http.Error(w, "There is no user with the given id", http.StatusForbidden)
+			return
+		}
+		bcryptErr := bcrypt.CompareHashAndPassword([]byte(passwordHash[0]), []byte(person.Password))
+		if bcryptErr == bcrypt.ErrMismatchedHashAndPassword {
+			http.Error(w, "Looks like your id or password is incorrect", http.StatusForbidden)
+		} else if bcryptErr == nil {
 			session, _ := cookieStorage.Get(r, "session")
 			session.Values["id"] = person.UserID
 			session.Values["expires"] = time.Now().Add(24 * time.Hour).Unix()
@@ -68,7 +81,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 			http.Redirect(w, r, "..", 302)
 		} else {
-			http.Error(w, "Looks like your login or password is incorrect", http.StatusForbidden)
+			panic(bcryptErr)
 		}
 	}
 }
