@@ -29,11 +29,17 @@ All the API methods (except `/login`):
     - `405 Method Not Allowed` for requests with incorrect HTTP Method
     - `500 Internal Server Error` for requests, which failed due to a server-side error
 
+  Please, note, that if there were multiple problems while processing your request and there are multiple status codes
+  applicable for your case, you can get a response with any of them (for example, if you send a bad request, and you are
+  not authorized, you may get a response with any of the `400 Bad Request` and `401 Unauthorized` statuses). The same
+  rule holds true for the statuses defined in the methods' docs: the statuses' priority order is implementation-defined
+  unless stated otherwise.
+
 Note that the documentation may not repeat these status codes and return-value keys, because they are common for all the
 methods below, unless otherwise stated
 
-
 ### `/login`
+
 **This method is an exception!**
 
 As you can see, its URL does not start with `/api/`. It also does not (ever) return `json`, but it submits to the rules
@@ -121,13 +127,15 @@ Response will contain a `json` of the following scheme: `{'days': [{'id': <int>,
 proportional average between colors of emotions and activities present at a certain day.
 <!-- TODO: Remove the `T00:00:00Z` part from the date format -->
 
-
 ### `/api/days`
+
 Add a new day
 
 #### Request
+
 Send a `POST` request with `Content-Type: application/x-www-form-urlencoded` with the following parameters:
-- `date` (`str`) - date of the day, formatted as `%Y-%M-%DT00:00:00Z`
+
+- `date` (`str`) - date of the day, formatted as `YYYY-MM-DD`
 
 - `activity_type` (`int`, optional, can be used multiple times) - `type_id`s of activities of the day
 
@@ -139,20 +147,42 @@ Send a `POST` request with `Content-Type: application/x-www-form-urlencoded` wit
 - `emotion_proportion` (`int`, optional, must be used the same number of times `emotion_type` was used) -
   `proportion`s of emotions
 
-If there is a day with the specified `date` already, you will get an error response with the `412 Precondition Failed`
-status code. If the numbers of entries of either `activity_type` and `activity_proportion` or `emotion_type` and
-`emotion_proportion` differ, you will get an error response with the `400 Bad Request` status code.
+**WARNING**: if you exchange activities and emotions (i.e. send an activity (both type and proportion) as it was an
+emotion), this mistake is silently ignored, and the values are stored in the database as if your request was correct
+(note that the activities' and emotions' types numbering is end-to-end, so the server always knows whether something is
+an activity or an emotion).
 
 #### Response
-Response will contain a `json` of the following scheme: `{'id': <int>}`, where `id` is the identifier of the created day
 
+Response will contain a `json` of the following scheme: `{'id': <int>}`, where `id` is the identifier of the created day
+if the request had finished successfully. The scheme will instead be `{'error_type': <str>}` if one of the errors
+described right above occurred, where `error_type` is a type of the error (see details below)
+
+If there is a day with the specified `date` already, you will get an error response with the `412 Precondition Failed`
+status code. If the number of entries of either `activity_type` and `activity_proportion` or `emotion_type` and
+`emotion_proportion` differ, you will get an error response with the `400 Bad Request` status code. If any of the types
+or proportions (of either of activities or emotions) is not a number, or any of the proportions is greater than 100, you
+will get a response with the `400 Bad Request` status code. If any of the types is incorrect (i.e. there is **neither**
+an activity, nor an emotion with that type for the user sending the request), you will get a response with the
+`412 Precondition Failed` status code.
+
+Unless the request is incorrect because of one of the errors described in the beginning of the docs (e.g. you are making
+a request without authorization, there is an internal server error, etc), if one of the above errors occur, the json
+response will contain the `error_type` field (`string`), value of which would one of the following:
+`types_and_proportions_lengths`, `incorrect_date`, `incorrect_type`, `incorrect_proportion`, `day_already_exists`. It
+can be used for understanding what exactly went wrong. Note, that `error_type` never tells you if the error was because
+of a problem in activities or emotions: it only tells whether it was in the types or in the proportions. Also note, that
+though there is the `error_type` field added, the usual field `error` (described in the beginning of the docs and
+containing a human-readable error) is not removed from responses of the method.
 
 ### `/api/days/<id: int>`
+
 Either get a list of emotions/activities `type_id`s and `proportion`s of a day by its id or delete a day
 <!-- TODO: probably add a parameter to specify if we want to retrieve only activities or only emotions -->
 <!-- TODO: add day update mechanism instead of requiring to delete and add a day -->
 
 #### Request
+
 To get info, send a `GET` request. To delete a day, send a `DELETE` request.
 
 #### Response
