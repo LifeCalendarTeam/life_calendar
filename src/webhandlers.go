@@ -113,6 +113,57 @@ func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) 
 	return ans, nil
 }
 
+// TODO: not forget to replace all the json fuck with `writeJSON` when fixing merge conflicts
+func HandleApiDays(w http.ResponseWriter, r *http.Request) {
+	session, _ := cookieStorage.Get(r, "session")
+	// Panics if user is not authorized. Will be fixed with the appropriate middleware
+	userID := session.Values["id"].(int)
+
+	panicIfError(r.ParseForm())
+
+	date, err := time.Parse("2006-01-02", r.FormValue("date"))
+	if err != nil {
+		js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "Unable to parse date",
+			"error_type": "incorrect_date"})
+		panicIfError(err)
+		http.Error(w, string(js), http.StatusPreconditionFailed)
+		return
+	}
+
+	// TODO: the two lines below are formatted automatically this way. I wonder if it is possible to write it better
+	if len(r.Form["activity_type"]) != len(r.Form["activity_proportion"]) ||
+		len(r.Form["emotion_type"]) != len(r.Form["emotion_proportion"]) {
+
+		js, err := json.Marshal(map[string]interface{}{"ok": false,
+			"error":      "Lengths of types and proportions of both activities and emotions must be equal correspondingly",
+			"error_type": "types_and_proportions_lengths"})
+		panicIfError(err)
+		http.Error(w, string(js), http.StatusBadRequest)
+		return
+	}
+
+	activitiesEmotionsTypes := append(r.Form["activity_type"], r.Form["emotion_type"]...)
+	activitiesEmotionsProportions := append(r.Form["activity_proportion"], r.Form["emotion_proportion"]...)
+
+	// TODO: all the following must be under one transaction!
+	res, err := db.Exec("INSERT INTO days(user_id, date) VALUES ($1, $2)", userID, date)
+	panicIfError(err) // TODO: probably this is a requester's mistake! Should return an appropriate error then
+	dayID, err := res.LastInsertId()
+	panicIfError(err) // TODO: figure out if this can ever happen with PostgreSQL. Probably we can omit the check
+	for idx := range activitiesEmotionsTypes {
+		// TODO: check if `type_id` belongs to the correct user. If not, should return 412. Btw, I believe this should
+		// be a PostgreSQL constraint
+		_, err = db.Exec("INSERT INTO activities_and_emotions(type_id, day_id, proportion) VALUES ($1, $2, $3)",
+			activitiesEmotionsTypes[idx], dayID, activitiesEmotionsProportions[idx])
+	}
+
+	js, err := json.Marshal(map[string]interface{}{"ok": true, "id": dayID})
+	panicIfError(err)
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(js)
+	panicIfError(err)
+}
+
 func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 	if session.IsNew {
@@ -157,12 +208,14 @@ func main() {
 	api.HandleFunc("/api/2", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hi..."))
 	})
+	api.HandleFunc("/api/days", HandleApiDays).Methods("POST")
 	api.HandleFunc("/api/days/brief", HandleApiDaysBrief).Methods("GET")
 	//api.HandleFunc("/api/days/{id:[0-9]+}")
 
 	final := http.NewServeMux()
 	final.Handle("/", UIPanicHandlerMiddleware(ui))
 	final.Handle("/api/", APIPanicHandlerMiddleware(api))
+	// TODO: Authorization check middleware
 
 	listenAddr := "localhost:4000"
 	fmt.Println("Listening at http://" + listenAddr)
