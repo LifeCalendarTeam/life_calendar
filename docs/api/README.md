@@ -18,7 +18,13 @@ All the API methods (except `/login`):
 
 - Returns a relevant HTTP status code. Common status codes for all methods are:
     - `200 OK` for requests handled without errors
-    - `400 Bad Request` for requests with an incorrect set of parameters
+    - `400 Bad Request` for requests with either an incorrect set of parameters or syntactically incorrect parameters'
+      values (if, however, the values are syntactically correct, but are not logically correct, don't satisfy some
+      invariants, etc, you should get a different error code, most likely `412 Precondition Failed` or something even
+      more specific).
+
+      **WARNING**: you are not guarantied to get such response if you send a request with parameters not documented for
+      an API method. It is possible that extra parameters will just be ignored
     - `401 Unauthorized` for requests sent without (or with incorrect/expired) cookies
     - `405 Method Not Allowed` for requests with incorrect HTTP Method
     - `500 Internal Server Error` for requests, which failed due to a server-side error
@@ -133,8 +139,8 @@ Send a `POST` request with `Content-Type: application/x-www-form-urlencoded` wit
 - `emotion_proportion` (`int`, optional, must be used the same number of times `emotion_type` was used) -
   `proportion`s of emotions
 
-If there is a day with the specified `date` already, you will get an error response with the `400 Bad Request` status
-code. If the numbers of entries of either `activity_type` and `activity_proportion` or `emotion_type` and
+If there is a day with the specified `date` already, you will get an error response with the `412 Precondition Failed`
+status code. If the numbers of entries of either `activity_type` and `activity_proportion` or `emotion_type` and
 `emotion_proportion` differ, you will get an error response with the `400 Bad Request` status code.
 
 #### Response
