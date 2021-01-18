@@ -17,17 +17,21 @@ All the API methods (except `/login`):
   human-readable explanation of the error occurred while processing your request)
 
 - Returns a relevant HTTP status code. Common status codes for all methods are:
-    - `200 OK` for requests handled without errors
-    - `400 Bad Request` for requests with either an incorrect set of parameters or syntactically incorrect parameters'
-      values (if, however, the values are syntactically correct, but are not logically correct, don't satisfy some
-      invariants, etc, you should get a different error code, most likely `412 Precondition Failed` or something even
-      more specific).
+  -   `200 OK` for requests handled without errors
 
-      **WARNING**: you are not guarantied to get such response if you send a request with parameters not documented for
-      an API method. It is possible that extra parameters will just be ignored
-    - `401 Unauthorized` for requests sent without (or with incorrect/expired) cookies
-    - `405 Method Not Allowed` for requests with incorrect HTTP Method
-    - `500 Internal Server Error` for requests, which failed due to a server-side error
+  -   `400 Bad Request` for requests with either an incorrect set of parameters or syntactically incorrect parameters'
+      values (if, however, the values are syntactically correct, but are not logically correct, don't satisfy some
+      invariants, etc, you should get a different error code, most likely `412 Precondition Failed` or something even more
+      specific).
+
+      **WARNING**: you are not guarantied to get such response if you send a request with parameters not documented for an
+      API method. It is possible that extra parameters will just be ignored
+
+  -   `401 Unauthorized` for requests sent without (or with incorrect/expired) cookies
+
+  -   `405 Method Not Allowed` for requests with incorrect HTTP Method
+
+  -   `500 Internal Server Error` for requests, which failed due to a server-side error
 
   Please, note, that if there were multiple problems while processing your request and there are multiple status codes
   applicable for your case, you can get a response with any of them (for example, if you send a bad request, and you are
@@ -57,6 +61,7 @@ Send a `POST` request with `Content-Type: application/x-www-form-urlencoded` wit
 #### Response
 A response with `Content-Type: text/html` is returned. Possible status codes:
 - `200 OK` - both `user_id` and `password` are correct. You have successfully authorized.
+
 - `403 Forbidden` - wrong `user_id` or `password`. You didn't authorize, no cookies were created.
   This method does not (ever) return a response with the `401 Unauthorized` status code. All the others are possible
 
@@ -135,17 +140,17 @@ Add a new day
 
 Send a `POST` request with `Content-Type: application/x-www-form-urlencoded` with the following parameters:
 
-- `date` (`str`) - date of the day, formatted as `YYYY-MM-DD`
+-   `date` (`str`) - date of the day, formatted as `YYYY-MM-DD`
 
-- `activity_type` (`int`, optional, can be used multiple times) - `type_id`s of activities of the day
+-   `activity_type` (`int`, optional, can be used multiple times) - `type_id`s of activities of the day
 
-- `activity_proportion` (`int`, optional, must be used the same number of times `activity_type` was used) -
-  `proportion`s of activities
+-   `activity_proportion` (`int`, optional, must be used the same number of times `activity_type` was used) -
+    `proportion`s of activities
 
-- `emotion_type` (`int`, optional, can be used multiple times) - `type_id`s of emotions of the day
+-   `emotion_type` (`int`, optional, can be used multiple times) - `type_id`s of emotions of the day
 
-- `emotion_proportion` (`int`, optional, must be used the same number of times `emotion_type` was used) -
-  `proportion`s of emotions
+-   `emotion_proportion` (`int`, optional, must be used the same number of times `emotion_type` was used) -
+    `proportion`s of emotions
 
 **WARNING**: if you exchange activities and emotions (i.e. send an activity (both type and proportion) as it was an
 emotion), this mistake is silently ignored, and the values are stored in the database as if your request was correct

@@ -114,7 +114,7 @@ func getAverageColor(proportionsAndColors []proportionAndColor) ([3]int, error) 
 }
 
 // TODO: not forget to replace all the json fuck with `writeJSON` when fixing merge conflicts
-func HandleApiDays(w http.ResponseWriter, r *http.Request) {
+func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 	// Panics if user is not authorized. Will be fixed with the appropriate middleware
 	userID := session.Values["id"].(int)
@@ -164,7 +164,7 @@ func HandleApiDays(w http.ResponseWriter, r *http.Request) {
 	panicIfError(err)
 }
 
-func HandleApiDaysBrief(w http.ResponseWriter, r *http.Request) {
+func HandleAPIDaysBrief(w http.ResponseWriter, r *http.Request) {
 	session, _ := cookieStorage.Get(r, "session")
 	if session.IsNew {
 		http.Error(w, "You should be authorized to call this method", http.StatusUnauthorized)
@@ -208,8 +208,8 @@ func main() {
 	api.HandleFunc("/api/2", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hi..."))
 	})
-	api.HandleFunc("/api/days", HandleApiDays).Methods("POST")
-	api.HandleFunc("/api/days/brief", HandleApiDaysBrief).Methods("GET")
+	api.HandleFunc("/api/days", HandleAPIDays).Methods("POST")
+	api.HandleFunc("/api/days/brief", HandleAPIDaysBrief).Methods("GET")
 	//api.HandleFunc("/api/days/{id:[0-9]+}")
 
 	final := http.NewServeMux()
