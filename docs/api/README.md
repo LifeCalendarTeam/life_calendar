@@ -166,10 +166,10 @@ described right above occurred, where `error_type` is a type of the error (see d
 If there is a day with the specified `date` already, you will get an error response with the `412 Precondition Failed`
 status code. If the number of entries of either `activity_type` and `activity_proportion` or `emotion_type` and
 `emotion_proportion` differ, you will get an error response with the `400 Bad Request` status code. If any of the types
-or proportions (of either of activities or emotions) is not a number, or any of the proportions is greater than 100, you
-will get a response with the `400 Bad Request` status code. If any of the types is incorrect (i.e. there is **neither**
-an activity, nor an emotion with that type for the user sending the request), you will get a response with the
-`412 Precondition Failed` status code.
+or proportions (of either of activities or emotions) is not a number, or any of the proportions is not an integer in the
+\[0; 100\] range, you will get a response with the `400 Bad Request` status code. If any of the types is incorrect (i.e.
+there is **neither** an activity, nor an emotion with that type for the user sending the request), you will get a
+response with the `412 Precondition Failed` status code.
 
 Unless the request is incorrect because of one of the errors described in the beginning of the docs (e.g. you are making
 a request without authorization, there is an internal server error, etc), if one of the above errors occur, the json
