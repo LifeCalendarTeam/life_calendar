@@ -1,19 +1,57 @@
 {{define "GET /login"}}
-	<html lang="en">
+	<html>
 	<head>
+		<title>Login</title>
 		<meta charset="UTF-8">
-		<title>Login page</title>
+		<link rel="stylesheet" type="text/css" href="static/css/login.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 	</head>
-
 	<body>
-	<h1>Do you remember your credentials? &#128561;</h1>
-	<p>
-	<form method="POST" enctype="application/x-www-form-urlencoded">
-		<input name="user_id" placeholder="Your ID" required><br>
-		<input name="password" type="password" placeholder="Your Password" required><br>
-		<button type="submit">Log in!</button>
-	</form>
-	</p>
+		<div class="loginbox">
+			<div id="loginform" style="display: block">
+				<h1>Login</h1>
+				<form style="margin-bottom: 10%;" method="POST" enctype="application/x-www-form-urlencoded">
+					<p style="margin-top: 10%;">Username</p>
+					<input type="text" name="" placeholder="Username">
+					<p>Password</p>
+					<input type="password" name="" placeholder="Password">
+					<input type="submit" name="" value="Login">
+				</form>
+				<a>Lost your password?</a>
+				<br>
+				<a onclick="switch_forms()">Don't have an account?</a>
+			</div>
+
+			<div id="registerform" style="display: none">
+				<h1>Join</h1>
+				<form>
+					<p>Email</p>
+					<input type="email" name="" placeholder="Email">
+					<p>Username</p>
+					<input type="text" name="" placeholder="Username">
+					<p>Password</p>
+					<input type="password" name="" placeholder="Password">
+					<br>
+					<input type="submit" name="" value="Join!">
+				</form>
+				<a onclick="switch_forms()">Have an account?</a>
+			</div>
+		</div>
+
+		<script>
+			function switch_forms() {
+				var login = document.getElementById("loginform");
+				var register = document.getElementById("registerform");
+
+				if (login.style.display === "none") {
+					login.style.display = "block";
+					register.style.display = "none";
+				} else {
+					login.style.display = "none";
+					register.style.display = "block";
+				}
+			}
+		</script>
 	</body>
 	</html>
 {{end}}
