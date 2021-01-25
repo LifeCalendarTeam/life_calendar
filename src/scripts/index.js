@@ -51,9 +51,9 @@ var dayButtons = new Vue({
         axios.get("/api/days/brief").then((response) => {
             if (response.data.ok) {
                 this.days = response.data.days;
-                for(let day of this.days) {
+                this.days.map((day) => {
                     day.data = new Date(day.data);
-                }
+                });
             }
             else {
                 alert("The request to API was not successful. Please try again or contact the authors.");
