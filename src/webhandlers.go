@@ -126,7 +126,7 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 		js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "Unable to parse date",
 			"error_type": "incorrect_date"})
 		panicIfError(err)
-		http.Error(w, string(js), http.StatusPreconditionFailed)
+		http.Error(w, string(js), http.StatusBadRequest)
 		return
 	}
 
@@ -145,17 +145,23 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	activitiesEmotionsTypes := append(r.Form["activity_type"], r.Form["emotion_type"]...)
 	activitiesEmotionsProportions := append(r.Form["activity_proportion"], r.Form["emotion_proportion"]...)
 
-	// TODO: all the following must be under one transaction!
-	res, err := db.Exec("INSERT INTO days(user_id, date) VALUES ($1, $2)", userID, date)
+	tx, err := db.Begin()
+	panicIfError(err)
+	defer func() {
+		_ = tx.Rollback()
+	}()
+	res, err := tx.Exec("INSERT INTO days(user_id, date) VALUES ($1, $2)", userID, date)
 	panicIfError(err) // TODO: probably this is a requester's mistake! Should return an appropriate error then
 	dayID, err := res.LastInsertId()
 	panicIfError(err) // TODO: figure out if this can ever happen with PostgreSQL. Probably we can omit the check
 	for idx := range activitiesEmotionsTypes {
 		// TODO: check if `type_id` belongs to the correct user. If not, should return 412. Btw, I believe this should
 		// be a PostgreSQL constraint
-		_, err = db.Exec("INSERT INTO activities_and_emotions(type_id, day_id, proportion) VALUES ($1, $2, $3)",
+		_, err = tx.Exec("INSERT INTO activities_and_emotions(type_id, day_id, proportion) VALUES ($1, $2, $3)",
 			activitiesEmotionsTypes[idx], dayID, activitiesEmotionsProportions[idx])
 	}
+	err = tx.Commit()
+	panicIfError(err)
 
 	js, err := json.Marshal(map[string]interface{}{"ok": true, "id": dayID})
 	panicIfError(err)
