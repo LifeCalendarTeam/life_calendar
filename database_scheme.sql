@@ -25,8 +25,20 @@ CREATE TABLE "types_of_activities_and_emotions" (
   "activity_or_emotion" activity_or_emotion NOT NULL
 );
 
+CREATE FUNCTION does_activity_or_emotion_belong_to_user_of_the_day(type_id integer, day_id integer) RETURNS bool
+    STABLE
+AS
+$$
+SELECT days.user_id = types_of_activities_and_emotions.user_id
+FROM days,
+     types_of_activities_and_emotions
+WHERE days.id = day_id
+  AND types_of_activities_and_emotions.id = type_id
+$$ LANGUAGE sql;
+
 CREATE TABLE "activities_and_emotions" (
   "type_id" integer REFERENCES types_of_activities_and_emotions NOT NULL,
   "day_id" integer REFERENCES days NOT NULL,
-  "proportion" integer NOT NULL
+  "proportion" integer NOT NULL,
+  CHECK (does_activity_or_emotion_belong_to_user_of_the_day(type_id,day_id))
 );
