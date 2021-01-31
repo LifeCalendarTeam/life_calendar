@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/schema"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/lib/pq"
 	"html/template"
 	"math"
 	"net/http"
@@ -150,10 +151,19 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		_ = tx.Rollback()
 	}()
-	res, err := tx.Exec("INSERT INTO days(user_id, date) VALUES ($1, $2)", userID, date)
-	panicIfError(err) // TODO: probably this is a requester's mistake! Should return an appropriate error then
-	dayID, err := res.LastInsertId()
-	panicIfError(err) // TODO: figure out if this can ever happen with PostgreSQL. Probably we can omit the check
+
+	var dayID int
+	err = tx.QueryRow("INSERT INTO days(user_id, date) VALUES ($1, $2) RETURNING id", userID, date).Scan(&dayID)
+	if pgErr, ok := err.(*pq.Error); ok {
+		if pgErr.Constraint == "days_user_id_date_key" {
+			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The user has a day with the date",
+				"error_type": "day_already_exists"})
+			panicIfError(err)
+			http.Error(w, string(js), http.StatusPreconditionFailed)
+			return
+		}
+	}
+	panicIfError(err)
 	for idx := range activitiesEmotionsTypes {
 		// TODO: check if `type_id` belongs to the correct user. If not, should return 412. Btw, I believe this should
 		// be a PostgreSQL constraint
