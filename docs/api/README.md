@@ -160,8 +160,10 @@ an activity or an emotion).
 #### Response
 
 Response will contain a `json` of the following scheme: `{'id': <int>}`, where `id` is the identifier of the created day
-if the request had finished successfully. The scheme will instead be `{'error_type': <str>}` if one of the errors
-described right above occurred, where `error_type` is a type of the error (see details below)
+if the request had finished successfully. The scheme will instead be either `{'error_type': <str>}` or
+`{'error_type': <str>, 'bad_ae_type': <str>}` if one of the errors described right above occurred. The meanings of
+`error_type` and `bad_ae_type` are described below. Note that the expected activities/emotions types are `int`s, but
+the returned `bad_ae_type` is `str`, to handle cases when the given type is not a number
 
 If there is a day with the specified `date` already, you will get an error response with the `412 Precondition Failed`
 status code. If the number of entries of either `activity_type` and `activity_proportion` or `emotion_type` and
@@ -181,6 +183,10 @@ response will contain the `error_type` field (`string`), value of which would on
 if the error was because of a problem in activities or emotions: it only tells whether it was in the types or in the
 proportions. Also note, that though there is the `error_type` field added, the usual field `error` (described in the
 beginning of the docs and containing a human-readable error) is not removed from responses of the method.
+
+If there is the `error_type` field in the response, and it is either of `incorrect_type`, `duplicated_type` or
+`incorrect_proportion`, the response will also contain the `bad_ae_type` ("ae" stands for activity/emotion) key,
+value of which is the type of activity/emotion which caused the error described in the response.
 
 ### `/api/days/<id: int>`
 
