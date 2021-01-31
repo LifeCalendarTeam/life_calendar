@@ -13,7 +13,8 @@ CREATE TABLE "users" (
 CREATE TABLE "days" (
   "id" serial PRIMARY KEY,
   "user_id" integer REFERENCES users NOT NULL,
-  "date" date NOT NULL
+  "date" date NOT NULL,
+  UNIQUE (user_id, date)
 );
 
 CREATE TABLE "types_of_activities_and_emotions" (
