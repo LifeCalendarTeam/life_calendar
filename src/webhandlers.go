@@ -136,7 +136,8 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 		len(r.Form["emotion_type"]) != len(r.Form["emotion_proportion"]) {
 
 		js, err := json.Marshal(map[string]interface{}{"ok": false,
-			"error":      "Lengths of types and proportions of both activities and emotions must be equal correspondingly",
+			"error": "Lengths of types and proportions of both activities and emotions must be equal " +
+				"correspondingly",
 			"error_type": "types_and_proportions_lengths"})
 		panicIfError(err)
 		http.Error(w, string(js), http.StatusBadRequest)
