@@ -22,7 +22,8 @@ import (
 var tmpl *template.Template
 var cookieStorage *sessions.CookieStore
 var requestsDecoder = schema.NewDecoder()
-var MaxProportion = 100.
+
+const MaxProportion = 100
 
 func loadHTMLTemplates() (*template.Template, error) {
 	tmpl := template.New("HTML templates")
@@ -187,9 +188,9 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, js, http.StatusBadRequest)
 			return
 		}
-		if proportion < 1 || proportion > 100 {
-			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The proportion must be from 1 to 100",
-				"error_type": "incorrect_proportion"})
+		if proportion < 1 || proportion > MaxProportion {
+			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The proportion must be from 1 to " +
+				strconv.Itoa(MaxProportion), "error_type": "incorrect_proportion"})
 			panicIfError(err)
 			writeJSON(w, js, http.StatusPreconditionFailed)
 			return
