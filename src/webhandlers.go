@@ -166,10 +166,50 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	}
 	panicIfError(err)
 	for idx := range activitiesEmotionsTypes {
-		// TODO: check if `type_id` belongs to the correct user. If not, should return 412. Btw, I believe this should
-		// be a PostgreSQL constraint
+		proportion, err := strconv.Atoi(activitiesEmotionsProportions[idx])
+		if err != nil {
+			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "Activity/emotion proportion must " +
+				"be an integer, not \"" + activitiesEmotionsProportions[idx] + "\"",
+				"error_type": "incorrect_proportion"})
+			panicIfError(err)
+			http.Error(w, string(js), http.StatusBadRequest)
+			return
+		}
+		if proportion < 1 || proportion > 100 {
+			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The proportion must be from 1 to 100",
+				"error_type": "incorrect_proportion"})
+			panicIfError(err)
+			http.Error(w, string(js), http.StatusPreconditionFailed)
+			return
+		}
+
 		_, err = tx.Exec("INSERT INTO activities_and_emotions(type_id, day_id, proportion) VALUES ($1, $2, $3)",
 			activitiesEmotionsTypes[idx], dayID, activitiesEmotionsProportions[idx])
+		if pgErr, ok := err.(*pq.Error); ok {
+			if pgErr.Constraint == "activities_and_emotions_type_id_fkey" ||
+				pgErr.Constraint == "type_owned_by_correct_user_check" {
+
+				js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The user doesn't have the " +
+					"activity/emotion with type " + activitiesEmotionsTypes[idx], "error_type": "incorrect_type"})
+				panicIfError(err)
+				http.Error(w, string(js), http.StatusPreconditionFailed)
+				return
+			}
+
+			// activity/emotion's `type_id` is not an `int`:
+			// (note that this error isn't about `proportion`, because it was earlier successfully converted to `int`)
+			if pgErr.Code.Name() == "invalid_text_representation" {
+				js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "Activity/emotion type id must " +
+					"be an integer, not \"" + activitiesEmotionsTypes[idx] + "\"", "error_type": "incorrect_type"})
+				panicIfError(err)
+				http.Error(w, string(js), http.StatusBadRequest)
+				return
+			}
+
+			// TODO: also implement and document the handling of the case when the request contained activity/emotion
+			// multiple times
+		}
+		panicIfError(err)
 	}
 	err = tx.Commit()
 	panicIfError(err)
