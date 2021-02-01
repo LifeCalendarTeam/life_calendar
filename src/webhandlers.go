@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -137,10 +136,9 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 
 	date, err := time.Parse("2006-01-02", r.FormValue("date"))
 	if err != nil {
-		js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "Unable to parse date",
-			"error_type": "incorrect_date"})
-		panicIfError(err)
-		writeJSON(w, js, http.StatusBadRequest)
+		writeJSON(w,
+			map[string]interface{}{"ok": false, "error": "Unable to parse date", "error_type": "incorrect_date"},
+			http.StatusBadRequest)
 		return
 	}
 
@@ -148,12 +146,10 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	if len(r.Form["activity_type"]) != len(r.Form["activity_proportion"]) ||
 		len(r.Form["emotion_type"]) != len(r.Form["emotion_proportion"]) {
 
-		js, err := json.Marshal(map[string]interface{}{"ok": false,
-			"error": "Lengths of types and proportions of both activities and emotions must be equal " +
-				"correspondingly",
-			"error_type": "types_and_proportions_lengths"})
-		panicIfError(err)
-		writeJSON(w, js, http.StatusBadRequest)
+		writeJSON(w, map[string]interface{}{"ok": false,
+			"error":      "Lengths of types and proportions of both activities and emotions must be equal correspondingly",
+			"error_type": "types_and_proportions_lengths"},
+			http.StatusBadRequest)
 		return
 	}
 
@@ -170,10 +166,9 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	err = tx.QueryRow("INSERT INTO days(user_id, date) VALUES ($1, $2) RETURNING id", userID, date).Scan(&dayID)
 	if pgErr, ok := err.(*pq.Error); ok {
 		if pgErr.Constraint == "days_user_id_date_key" {
-			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The user has a day with the date",
-				"error_type": "day_already_exists"})
-			panicIfError(err)
-			writeJSON(w, js, http.StatusPreconditionFailed)
+			writeJSON(w,
+				map[string]interface{}{"ok": false, "error": "The user has a day with the date",
+					"error_type": "day_already_exists"}, http.StatusPreconditionFailed)
 			return
 		}
 	}
@@ -181,18 +176,18 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	for idx := range activitiesEmotionsTypes {
 		proportion, err := strconv.Atoi(activitiesEmotionsProportions[idx])
 		if err != nil {
-			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "Activity/emotion proportion must " +
-				"be an integer, not \"" + activitiesEmotionsProportions[idx] + "\"",
-				"error_type": "incorrect_proportion"})
-			panicIfError(err)
-			writeJSON(w, js, http.StatusBadRequest)
+			writeJSON(w,
+				map[string]interface{}{"ok": false, "error": "Activity/emotion proportion must be an integer, not \"" +
+					activitiesEmotionsProportions[idx] + "\"",
+					"error_type": "incorrect_proportion"},
+				http.StatusBadRequest)
 			return
 		}
 		if proportion < 1 || proportion > MaxProportion {
-			js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The proportion must be from 1 to " +
-				strconv.Itoa(MaxProportion), "error_type": "incorrect_proportion"})
-			panicIfError(err)
-			writeJSON(w, js, http.StatusPreconditionFailed)
+			writeJSON(w,
+				map[string]interface{}{"ok": false, "error": "The proportion must be from 1 to " +
+					strconv.Itoa(MaxProportion), "error_type": "incorrect_proportion"},
+				http.StatusPreconditionFailed)
 			return
 		}
 
@@ -202,20 +197,20 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 			if pgErr.Constraint == "activities_and_emotions_type_id_fkey" ||
 				pgErr.Constraint == "type_owned_by_correct_user_check" {
 
-				js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "The user doesn't have the " +
-					"activity/emotion with type " + activitiesEmotionsTypes[idx], "error_type": "incorrect_type"})
-				panicIfError(err)
-				writeJSON(w, js, http.StatusPreconditionFailed)
+				writeJSON(w,
+					map[string]interface{}{"ok": false, "error": "The user doesn't have the activity/emotion with " +
+						"type " + activitiesEmotionsTypes[idx], "error_type": "incorrect_type"},
+					http.StatusPreconditionFailed)
 				return
 			}
 
 			// activity/emotion's `type_id` is not an `int`:
 			// (note that this error isn't about `proportion`, because it was earlier successfully converted to `int`)
 			if pgErr.Code.Name() == "invalid_text_representation" {
-				js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "Activity/emotion type id must " +
-					"be an integer, not \"" + activitiesEmotionsTypes[idx] + "\"", "error_type": "incorrect_type"})
-				panicIfError(err)
-				writeJSON(w, js, http.StatusBadRequest)
+				writeJSON(w,
+					map[string]interface{}{"ok": false, "error": "Activity/emotion type id must " +
+						"be an integer, not \"" + activitiesEmotionsTypes[idx] + "\"", "error_type": "incorrect_type"},
+					http.StatusBadRequest)
 				return
 			}
 
@@ -227,11 +222,7 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 	err = tx.Commit()
 	panicIfError(err)
 
-	js, err := json.Marshal(map[string]interface{}{"ok": true, "id": dayID})
-	panicIfError(err)
-	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(js)
-	panicIfError(err)
+	writeJSON(w, map[string]interface{}{"ok": true, "id": dayID}, http.StatusOK)
 }
 
 func HandleAPIDaysBrief(w http.ResponseWriter, r *http.Request) {
@@ -258,9 +249,7 @@ func HandleAPIDaysBrief(w http.ResponseWriter, r *http.Request) {
 		panicIfError(err)
 	}
 
-	js, err := json.Marshal(map[string]interface{}{"ok": true, "days": days})
-	panicIfError(err)
-	writeJSON(w, js, http.StatusOK)
+	writeJSON(w, map[string]interface{}{"ok": true, "days": days}, http.StatusOK)
 }
 
 func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
@@ -279,14 +268,14 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 		session.Values["id"]))
 	dayExists := b[0]
 
-	var js []byte
+	var data map[string]interface{}
 	var status = http.StatusOK
 
 	if dayExists {
 		if r.Method == "DELETE" {
 			_, err = db.Exec("DELETE FROM days WHERE id=$1", id)
 			if err == nil {
-				js, err = json.Marshal(map[string]interface{}{"ok": true})
+				data = map[string]interface{}{"ok": true}
 			}
 		} else {
 			activitiesAndEmotions := make([]activityOrEmotionWithType, 0)
@@ -305,15 +294,14 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			js, err = json.Marshal(map[string]interface{}{"ok": true, "activities": activities, "emotions": emotions})
+			data = map[string]interface{}{"ok": true, "activities": activities, "emotions": emotions}
 		}
 	} else {
-		js, err = json.Marshal(map[string]interface{}{"ok": false, "error": "Day does not exist"})
+		data = map[string]interface{}{"ok": false, "error": "Day does not exist"}
 		status = http.StatusNotFound
 	}
 
-	panicIfError(err)
-	writeJSON(w, js, status)
+	writeJSON(w, data, status)
 }
 
 func main() {
