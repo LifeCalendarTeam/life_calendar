@@ -169,16 +169,18 @@ status code. If the number of entries of either `activity_type` and `activity_pr
 or proportions (of either of activities or emotions) is not a number, or any of the proportions is not an integer in the
 \[0; 100\] range, you will get a response with the `400 Bad Request` status code. If any of the types is incorrect (i.e.
 there is **neither** an activity, nor an emotion with that type for the user sending the request), you will get a
-response with the `412 Precondition Failed` status code.
+response with the `412 Precondition Failed` status code. If there is a type of activity/emotion, which was mentioned
+more than once in the request (including the case when the same type is mentioned once as an activity and once as an
+emotion), you will get a response with the `400 Bad Request` status code.
 
 Unless the request is incorrect because of one of the errors described in the beginning of the docs (e.g. you are making
 a request without authorization, there is an internal server error, etc), if one of the above errors occur, the json
 response will contain the `error_type` field (`string`), value of which would one of the following:
-`types_and_proportions_lengths`, `incorrect_date`, `incorrect_type`, `incorrect_proportion`, `day_already_exists`. It
-can be used for understanding what exactly went wrong. Note, that `error_type` never tells you if the error was because
-of a problem in activities or emotions: it only tells whether it was in the types or in the proportions. Also note, that
-though there is the `error_type` field added, the usual field `error` (described in the beginning of the docs and
-containing a human-readable error) is not removed from responses of the method.
+`types_and_proportions_lengths`, `incorrect_date`, `incorrect_type`, `duplicated_type`, `incorrect_proportion`,
+`day_already_exists`. It can be used for understanding what exactly went wrong. Note, that `error_type` never tells you
+if the error was because of a problem in activities or emotions: it only tells whether it was in the types or in the
+proportions. Also note, that though there is the `error_type` field added, the usual field `error` (described in the
+beginning of the docs and containing a human-readable error) is not removed from responses of the method.
 
 ### `/api/days/<id: int>`
 
