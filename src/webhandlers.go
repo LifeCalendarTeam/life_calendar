@@ -215,8 +215,13 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// TODO: also implement and document the handling of the case when the request contained activity/emotion
-			// multiple times
+			if pgErr.Constraint == "activities_and_emotions_type_id_day_id_key" {
+				writeJSON(w,
+					map[string]interface{}{"ok": false, "error": "Activity/emotion type id can't be mentioned more " +
+						"than once", "error_type": "duplicated_type"},
+					http.StatusBadRequest)
+				return
+			}
 		}
 		panicIfError(err)
 	}

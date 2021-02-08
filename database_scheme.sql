@@ -49,5 +49,6 @@ CREATE TABLE "activities_and_emotions" (
   "type_id" integer REFERENCES types_of_activities_and_emotions NOT NULL,
   "day_id" integer REFERENCES days ON DELETE CASCADE NOT NULL,
   "proportion" integer NOT NULL,
+  UNIQUE (type_id, day_id), -- A day can't contain the same activity/emotion twice
   CONSTRAINT type_owned_by_correct_user_check CHECK (does_activity_or_emotion_belong_to_user_of_the_day(type_id,day_id))
 );
