@@ -49,7 +49,7 @@ A response with `Content-Type: text/html` is returned. Possible status codes:
   This method does not (ever) return a response with the `401 Unauthorized` status code. All the others are possible
 
 
-### `/activities`
+### `/api/activities`
 Either get all activities or add a new activity
 
 #### Request
@@ -68,11 +68,11 @@ For `POST`: response will contain a `json` of the following scheme `{'type_id': 
 days.
 
 
-### `/emotions`
+### `/api/emotions`
 Exactly like `/activities` (but for emotions)
 
 
-### `/activities/<type_id: int>`
+### `/api/activities/<type_id: int>`
 Either get info about the activity type by its id or update an activity
 
 #### Request
@@ -96,7 +96,7 @@ For `PATCH`: you will get a response with the `200 OK` status code
 If there is no activity with the `id` identifier, you will get an error response with the `404 Not Found` status code
 
 
-### `/emotions/<type_id: int>`
+### `/api/emotions/<type_id: int>`
 Exactly like `/activities/<type_id: int>` (but for emotions)
 
 
