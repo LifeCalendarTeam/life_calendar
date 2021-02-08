@@ -173,6 +173,7 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	panicIfError(err)
+
 	for idx := range activitiesEmotionsTypes {
 		proportion, err := strconv.Atoi(activitiesEmotionsProportions[idx])
 		if err != nil {
@@ -219,8 +220,7 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 		}
 		panicIfError(err)
 	}
-	err = tx.Commit()
-	panicIfError(err)
+	panicIfError(tx.Commit())
 
 	writeJSON(w, map[string]interface{}{"ok": true, "id": dayID}, http.StatusOK)
 }
