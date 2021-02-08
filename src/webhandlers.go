@@ -209,7 +209,7 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 			// (note that this error isn't about `proportion`, because it was earlier successfully converted to `int`)
 			if pgErr.Code.Name() == "invalid_text_representation" {
 				writeJSON(w,
-					map[string]interface{}{"ok": false, "error": "All activity/emotion type ids must be integers",
+					map[string]interface{}{"ok": false, "error": "All activity/emotion types must be integers",
 						"bad_ae_type": activitiesEmotionsTypes[idx], "error_type": "incorrect_type"},
 					http.StatusBadRequest)
 				return
@@ -217,7 +217,7 @@ func HandleAPIDays(w http.ResponseWriter, r *http.Request) {
 
 			if pgErr.Constraint == "activities_and_emotions_type_id_day_id_key" {
 				writeJSON(w,
-					map[string]interface{}{"ok": false, "error": "Activity/emotion type id can't be mentioned more " +
+					map[string]interface{}{"ok": false, "error": "Activity/emotion types can't be mentioned more " +
 						"than once", "bad_ae_type": activitiesEmotionsTypes[idx], "error_type": "duplicated_type"},
 					http.StatusBadRequest)
 				return
