@@ -208,6 +208,12 @@ func HandleAPIDaysID(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, js, status)
 }
 
+func HandleAPI404(w http.ResponseWriter, _ *http.Request) {
+	js, err := json.Marshal(map[string]interface{}{"ok": false, "error": "No such API method"})
+	panicIfError(err)
+	writeJSON(w, js, http.StatusNotFound)
+}
+
 func main() {
 	ui := mux.NewRouter()
 	ui.Path("/").Methods("GET").HandlerFunc(HandleRoot)
@@ -217,6 +223,7 @@ func main() {
 	api := mux.NewRouter()
 	api.Path("/api/days/brief").Methods("GET").HandlerFunc(HandleApiDaysBrief)
 	api.Path("/api/days/{id:[0-9]+}").Methods("GET", "DELETE").HandlerFunc(HandleAPIDaysID)
+	api.NotFoundHandler = http.HandlerFunc(HandleAPI404)
 
 	final := http.NewServeMux()
 	final.Handle("/", UIPanicHandlerMiddleware(ui))
