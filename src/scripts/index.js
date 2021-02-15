@@ -14,25 +14,26 @@ var dayButtons = new Vue({
             return "#" + convertToHex(color[0]) + convertToHex(color[1]) + convertToHex(color[2]);
         },
 
-        isDayFilled(day) {
+        findDayByDate(day) {
+            let seconds = Date.parse(day.toISOString());
             for(let filledDay of this.days) {
-                if(Date.parse(filledDay.date) === Date.parse(day.toISOString())) {
-                    return true;
+                if(filledDay.date === seconds) {
+                    return {ok: true, day: filledDay};
                 }
             }
-            return false;
+            return {ok: false, day: this.days[0]};
         },
 
         getFilledDayColor(day) {
-            for(let filledDay of this.days) {
-                if(Date.parse(filledDay.date) === Date.parse(day.toISOString())) {
-                    return this.toHexFromRGB(filledDay.average_color);
-                }
+            let foundDay = this.findDayByDate(day);
+            if(foundDay.ok) {
+                return this.toHexFromRGB(foundDay.day.average_color);
             }
             return "#a9a9a9";
         },
 
         getDisplayedWeeks() {
+            // This is not the closest Sunday at the creation moment, but it will be in future
             let closestSunday = new Date();
             closestSunday = new Date(Date.UTC(closestSunday.getFullYear(), closestSunday.getMonth(),
                 closestSunday.getDate() + 7 - closestSunday.getDay()));
@@ -52,7 +53,7 @@ var dayButtons = new Vue({
             if (response.data.ok) {
                 this.days = response.data.days;
                 this.days.map((day) => {
-                    day.data = new Date(day.data);
+                    day.date = Date.parse(day.date);
                 });
             }
             else {
